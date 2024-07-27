@@ -8,10 +8,31 @@
 </head>
 <body>
     <div>
-      <label for="driverno">Driver Number: </label>
-      <input type="number" id="driverno" name="driverno">
+      <label for="year">Year: </label>
+      <input type="number" id="year" name="year">
       <button id="find">Search</button>
     </div>
+    <div id="country-container" >
+        <label for="country">Select Country:</label>
+        <select id="country" onchange="fetchSessions()">
+            <option value="">Select Country</option>
+        </select>
+    </div>
+    <div id="session-container" >
+        <label for="session">Select Session:</label>
+        <select id="session" onchange="showDriverSearch()">
+            <option value="">Select Session</option>
+        </select>
+    </div>
+    <div id="driver-container" >
+        <label for="driver">Select Driver:</label>
+        <select name="" id="driver" onchange="searchDriver()">
+            <option value="">Select Driver</option>
+        </select>
+        <!-- <input type="text" id="driver" placeholder="Enter driver number" />
+        <button onclick="searchDriver()">Search</button> -->
+    </div>
+    
     <div id="table-container"></div>
     <button onclick="exportToExcel()">Export to Excel</button>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
