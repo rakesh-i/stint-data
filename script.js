@@ -78,11 +78,12 @@ async function gatherdata(){
             let end = data2[i].lap_end;
             stinttyre.push(data2[i].compound);
             for (let j = start; j <= end; j++) {
-                if (j >= data1.length) {
-                    continue;
-                } else {
-                    stint[i].push(data1[j - 1].lap_duration);
+                if(data1[j-1].lap_duration===null){
+                    stint[i].push('NaN');
                 }
+                else{
+                    stint[i].push(data1[j - 1].lap_duration.toFixed(3));
+                }         
             }
         }
         console.log(stint);
