@@ -78,11 +78,15 @@ async function gatherdata(){
             let end = data2[i].lap_end;
             stinttyre.push(data2[i].compound);
             for (let j = start; j <= end; j++) {
-                if(data1[j-1].lap_duration===null){
+                let x = data1[j-1];
+                if(x==undefined){
+                    stint[i].push('NaN');
+                }
+                else if(x.lap_duration===null){
                     stint[i].push('NaN');
                 }
                 else{
-                    stint[i].push(data1[j - 1].lap_duration.toFixed(3));
+                    stint[i].push(x.lap_duration.toFixed(3));
                 }         
             }
         }
@@ -119,7 +123,9 @@ function displayTable() {
             table += '<th rowspan="' + maxLaps + '">Lap Data</th>';
         }
         for (let i = 0; i < stint.length; i++) {
-            table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${stint[i][j] || ''}</td>`;
+            const lapTime = stint[i][j];
+            const formattedTime = lapTime ? formatTime(lapTime) : '';
+            table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${formattedTime}</td>`;
         }
         table += '</tr>';
     }
@@ -127,7 +133,7 @@ function displayTable() {
     table += '<tr>';
     table += '<th>Average</th>';
     for (let i = 0; i < stint.length; i++) {
-        table += `<td id="avg-${i}">0.000</td>`;
+        table += `<td id="avg-${i}">0:00.000</td>`;
     }
     table += '</tr>';
 
@@ -150,22 +156,39 @@ function displayTable() {
     updateAverages();
 }
 
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.floor((seconds % 1) * 1000);
+    return `${minutes}:${secs.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+}
+
 function updateAverages() {
     for (let i = 0; i < stint.length; i++) {
         let sum = 0;
         let count = 0;
         document.querySelectorAll(`.lap[data-stint="${i}"]`).forEach(cell => {
             if (cell.classList.contains('selected')) {
-                const lapTime = parseFloat(cell.textContent);
+                const lapTimeText = cell.textContent;
+                console.log(lapTimeText);
+                
+                const lapTime = lapTimeText!=undefined? parseTime(lapTimeText):0.000;
                 if (!isNaN(lapTime)) {
                     sum += lapTime;
                     count++;
                 }
             }
         });
-        const average = count === 0 ? 0 : (sum / count).toFixed(3);
-        document.getElementById(`avg-${i}`).textContent = average;
+        const averageTime = count === 0 ? 0 : (sum / count);
+        const formattedAverage = formatTime(averageTime);
+        document.getElementById(`avg-${i}`).textContent = formattedAverage;
     }
+}
+
+function parseTime(timeString) {
+    const [minutes, secondsWithMs] = timeString.split(':');
+    const [seconds, milliseconds] = secondsWithMs.split('.');
+    return parseInt(minutes) * 60 + parseInt(seconds) + parseInt(milliseconds) / 1000;
 }
 
 function exportToExcel() {
