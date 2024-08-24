@@ -38,6 +38,7 @@ async function fetchSessions() {
     });
     document.getElementById('session-container').style.display = 'block';
 }
+
 async function showDriverSearch() {
     const sessionKey = document.getElementById('session').value;
     let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
@@ -96,7 +97,6 @@ async function gatherdata(){
         console.log(error);
     }
 }
-
 
 function displayTable() {
     const container = document.getElementById('table-container');
@@ -185,6 +185,7 @@ function searchDriver(){
   stinttyre = [];
   gatherdata();
 }
+
 document.getElementById('find').addEventListener('click', function(){
     fetchMeetings();    
 });
