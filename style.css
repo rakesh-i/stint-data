@@ -4,3 +4,48 @@
 .deselected {
     background-color: red;
 }
+
+body{
+    /* background-color: rgb(246 244 240 ); */
+}
+.container {
+    height: 100px;
+    overflow-y: auto;
+    padding: 5px;
+    background-color: rgb(246 244 240 );
+}
+
+/* Styling individual list items */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    font-family: 'roboto';
+    font-size: 24px;
+    padding: 3px 2px;
+    cursor: pointer; /* Indicate that items are clickable */
+}
+
+/* Style for the choose item */
+li.choose {
+    /* background-color: #007bff; Highlight color */
+    text-decoration: underline;
+    text-decoration-color: red;
+    /* color: white;              */
+    font-weight: 600;
+}
+
+.content{
+    width: 500px;
+}
+
+.header{
+    font-size: 30px;
+    padding: 5px;
+    border-bottom: solid 1px #e5e7eb;
+    background-color: #ffffff;
+    height: 40px;
+}

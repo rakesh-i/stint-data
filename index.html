@@ -7,23 +7,52 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div>
+    <div class="season content">
+        <div class="header">Season</div>
+        <div class="year-container container">
+            <ul id="year-list">
+                <li>2024</li>
+                <li>2023</li>
+                <li>2022</li>
+                <li>2021</li>
+                <li>2020</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="races content">
+        <div class="header">Races</div>
+        <div class="race-container container">
+            <ul id="race-list">
+            </ul>
+        </div>
+    </div>
+
+    <div class="session content">
+        <div class="header">Session</div>
+        <div class="session-container container">
+            <ul id="session-list">
+            </ul>
+        </div>
+    </div>
+
+    <!-- <div>
       <label for="year">Year: </label>
       <input type="number" id="year" name="year">
       <button id="find">Search</button>
-    </div>
-    <div id="country-container" >
+    </div> -->
+    <!-- <div id="country-container" >
         <label for="country">Select Country:</label>
         <select id="country" onchange="fetchSessions()">
             <option value="">Select Country</option>
         </select>
-    </div>
-    <div id="session-container" >
+    </div> -->
+    <!-- <div id="session-container" >
         <label for="session">Select Session:</label>
         <select id="session" onchange="showDriverSearch()">
             <option value="">Select Session</option>
         </select>
-    </div>
+    </div> -->
     <div id="driver-container" >
         <label for="driver">Select Driver:</label>
         <select name="" id="driver" onchange="searchDriver()">
