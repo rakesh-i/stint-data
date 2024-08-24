@@ -11,7 +11,7 @@ function selectYear(event) {
     event.target.classList.add('choose');
     console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    showDriverSearch(event.target.value);
+    fetchMeetings(event.target.textContent);
 }
 
 function selectRace(event){
@@ -28,8 +28,8 @@ function selectSession(event){
     listSession.forEach(item => item.classList.remove('choose'));
     event.target.classList.add('choose');
     console.log(event.target.textContent);
-    event.target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
-    fetchSessions(event.target.textContent);
+    event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showDriverSearch(event.target.value);
 }
 
 function createSession(data){
@@ -135,6 +135,7 @@ async function fetchSessions(country) {;
 }
 
 async function showDriverSearch(sessionKey) {
+    // const sessionKey = document.getElementById('session').value;
     let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
     let data = await drivers.json();
     console.log(data);
