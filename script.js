@@ -41,7 +41,7 @@ function selectDriver(event){
     searchDriver(event.target.value);
 }
 
-function createDriverlist(data){
+function createDriverList(data){
     const driverList = document.querySelector('#driver-list');
     driverList.innerHTML = '';
     data.forEach(x=>{
@@ -56,7 +56,7 @@ function createDriverlist(data){
     });
 }
 
-function createSession(data){
+function createSessionList(data){
     const sessionList = document.querySelector('#session-list');
     sessionList.innerHTML = '';
     data.forEach(x=>{
@@ -101,44 +101,28 @@ function createRacelist(data){
 }   
 
 function createYearlist(){
-    // Get all list items
     const listYears = document.querySelectorAll('.year-container li');
 
-    // Add event listener to each list item
     listYears.forEach(item => {
         item.addEventListener('click', selectYear);
     });
 
-    // Select the first item by default
     listYears[0].classList.add('choose');
     listYears[0].scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(listYears[0].textContent);
 }
 
-createYearlist();
-
-
 async function fetchMeetings(year){
-    // let year = document.getElementById('year').value;
     let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
     let data = await meetings.json();
     console.log(data); 
     createRacelist(data);
-    // const countrySelect = document.getElementById('country');
-    // countrySelect.innerHTML = '<option value="">Select Country</option>';
-    // data.forEach(x=>{
-    //     const option = document.createElement('option');
-    //     option.value = x.country_name;
-    //     option.textContent = x.country_name;
-    //     countrySelect.appendChild(option);
-    // });
-    // document.getElementById('country-container').style.display = 'block';
 }
 
 async function fetchSessions(country) {;
     const year = document.querySelector('.year-container li.choose').textContent;
-
     console.log(year, country);
+
     if (!country) {
         alert('Please select a country.');
         return;
@@ -146,20 +130,11 @@ async function fetchSessions(country) {;
     let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
     let data = await session.json();
     console.log(data);
-    // const sessionSelect = document.getElementById('session');
-    // sessionSelect.innerHTML = '<option value="">Select Session</option>';
-    // data.forEach(x=>{
-    //     const option = document.createElement('option');
-    //     option.value = x.session_key;
-    //     option.textContent = x.session_name;
-    //     sessionSelect.appendChild(option);
-    // });
-    createSession(data);
-    // document.getElementById('session-container').style.display = 'block';
+
+    createSessionList(data);
 }
 
 async function showDriverSearch(sessionKey) {
-    // const sessionKey = document.getElementById('session').value;
     let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
     let data = await drivers.json();
     console.log(data);
@@ -167,16 +142,7 @@ async function showDriverSearch(sessionKey) {
         alert('Please select a session.');
         return;
     }
-    // const driverSelect = document.getElementById('driver');
-    // driverSelect.innerHTML = '<option value="">Select Driver</option>';
-    // data.forEach(x=>{
-    //     const option = document.createElement('option');
-    //     option.value = x.driver_number;
-    //     option.textContent = x.broadcast_name;
-    //     driverSelect.appendChild(option);
-    // });
-    // document.getElementById('driver-container').style.display = 'block';
-    createDriverlist(data);
+    createDriverList(data);
 }
 
 async function gatherdata(driver_number){
@@ -304,4 +270,5 @@ function searchDriver(driver){
   gatherdata(driver);
 }
 
+createYearlist();
 
