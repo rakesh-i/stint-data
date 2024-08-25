@@ -32,6 +32,30 @@ function selectSession(event){
     showDriverSearch(event.target.value);
 }
 
+function selectDriver(event){
+    const listDriver = document.querySelectorAll('#driver-list li');
+    listDriver.forEach(item=> item.classList.remove('choose'));
+    event.target.classList.add('choose');
+    console.log(event.target.textContent);
+    event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    searchDriver(event.target.value);
+}
+
+function createDriverlist(data){
+    const driverList = document.querySelector('#driver-list');
+    driverList.innerHTML = '';
+    data.forEach(x=>{
+        const driver = document.createElement('li');
+        driver.value = x.driver_number;
+        driver.textContent = x.broadcast_name;
+        driverList.appendChild(driver);
+    });
+    const listDriver = document.querySelectorAll('#driver-list li');
+    listDriver.forEach(item=>{
+        item.addEventListener('click', selectDriver);
+    });
+}
+
 function createSession(data){
     const sessionList = document.querySelector('#session-list');
     sessionList.innerHTML = '';
@@ -143,22 +167,21 @@ async function showDriverSearch(sessionKey) {
         alert('Please select a session.');
         return;
     }
-    const driverSelect = document.getElementById('driver');
-    driverSelect.innerHTML = '<option value="">Select Driver</option>';
-    data.forEach(x=>{
-        const option = document.createElement('option');
-        option.value = x.driver_number;
-        option.textContent = x.broadcast_name;
-        driverSelect.appendChild(option);
-    });
-    document.getElementById('driver-container').style.display = 'block';
+    // const driverSelect = document.getElementById('driver');
+    // driverSelect.innerHTML = '<option value="">Select Driver</option>';
+    // data.forEach(x=>{
+    //     const option = document.createElement('option');
+    //     option.value = x.driver_number;
+    //     option.textContent = x.broadcast_name;
+    //     driverSelect.appendChild(option);
+    // });
+    // document.getElementById('driver-container').style.display = 'block';
+    createDriverlist(data);
 }
 
-async function gatherdata(){
+async function gatherdata(driver_number){
     try {
-        let sessionKey = document.getElementById('session').value;
-        let driver_number = document.getElementById('driver').value;
-
+        const sessionKey = document.querySelector('#session-list li.choose').value;
         let response = await fetch(`${apiBaseURL}/laps?session_key=${sessionKey}&driver_number=${driver_number}`);
         const data1 = await response.json();
         response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`);
@@ -273,15 +296,12 @@ function exportToExcel() {
     XLSX.writeFile(wb, 'stint_data.xlsx');
 }
 
-function searchDriver(){
+function searchDriver(driver){
   const container = document.getElementById('table-container');
   container.innerHTML = '';
   stint = [];
   stinttyre = [];
-  gatherdata();
+  gatherdata(driver);
 }
 
-// document.getElementById('find').addEventListener('click', function(){
-//     fetchMeetings();    
-// });
 
