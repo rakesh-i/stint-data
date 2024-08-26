@@ -3,11 +3,9 @@ let stinttyre = [];
 const apiBaseURL = 'https://api.openf1.org/v1';
 
 function selectYear(event) {
-    // Remove 'choose' class from all items
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
     
-    // Add 'choose' class to the clicked item
     event.target.classList.add('choose');
     console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
