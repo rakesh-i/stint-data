@@ -23,7 +23,8 @@
     background-color: white;
 }
 .deselected {
-    background-color: red;
+    color: #c1c1c1;
+    background-color: black;
 }
 
 .table{
@@ -98,4 +99,22 @@ li.choose {
     }
     
 
+}
+
+.HARD{
+    background-color: white;
+}
+.MEDIUM{
+    background-color: yellow;
+}
+.SOFT{
+    color: white;
+    background-color: Red;
+}
+.INTERMEDIATE{
+    background-color: aqua;
+}
+.WET{
+    color: white;
+    background-color: blue;
 }
