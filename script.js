@@ -1,15 +1,12 @@
-let stint = [];
-let stinttyre = [];
 const apiBaseURL = 'https://api.openf1.org/v1';
+let driverMap = new Map();
 
 function selectYear(event) {
-    // Remove 'choose' class from all items
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
     
-    // Add 'choose' class to the clicked item
     event.target.classList.add('choose');
-    console.log(event.target.textContent);
+    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(event.target.textContent);
 }
@@ -18,7 +15,7 @@ function selectRace(event){
     const listRaces = document.querySelectorAll('.race-container li');
     listRaces.forEach(item => item.classList.remove('choose'));
     event.target.classList.add('choose');
-    console.log(event.target.textContent);
+    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
     fetchSessions(event.target.textContent);
 }
@@ -27,18 +24,15 @@ function selectSession(event){
     const listSession = document.querySelectorAll('.session-container li');
     listSession.forEach(item => item.classList.remove('choose'));
     event.target.classList.add('choose');
-    console.log(event.target.textContent);
+    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     showDriverSearch(event.target.value);
 }
 
 function selectDriver(event){
     const listDriver = document.querySelectorAll('#driver-list li');
-    listDriver.forEach(item=> item.classList.remove('choose'));
-    event.target.classList.add('choose');
-    console.log(event.target.textContent);
-    event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    searchDriver(event.target.value);
+    event.target.classList.toggle('choose');
+    searchDriver(event.target.value, event.target.textContent);
 }
 
 function createDriverList(data){
@@ -115,13 +109,13 @@ function createYearlist(){
 async function fetchMeetings(year){
     let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
     let data = await meetings.json();
-    console.log(data); 
+    // console.log(data); 
     createRacelist(data);
 }
 
 async function fetchSessions(country) {;
     const year = document.querySelector('.year-container li.choose').textContent;
-    console.log(year, country);
+    // console.log(year, country);
 
     if (!country) {
         alert('Please select a country.');
@@ -129,7 +123,7 @@ async function fetchSessions(country) {;
     }
     let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
     let data = await session.json();
-    console.log(data);
+    // console.log(data);
 
     createSessionList(data);
 }
@@ -137,7 +131,7 @@ async function fetchSessions(country) {;
 async function showDriverSearch(sessionKey) {
     let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
     let data = await drivers.json();
-    console.log(data);
+    // console.log(data);
     if (!sessionKey) {
         alert('Please select a session.');
         return;
@@ -145,14 +139,15 @@ async function showDriverSearch(sessionKey) {
     createDriverList(data);
 }
 
-async function gatherdata(driver_number){
+async function gatherdata(driver_number, name){
     try {
+        const stint = [];
+        const stinttyre = [];
         const sessionKey = document.querySelector('#session-list li.choose').value;
         let response = await fetch(`${apiBaseURL}/laps?session_key=${sessionKey}&driver_number=${driver_number}`);
         const data1 = await response.json();
         response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`);
         const data2 = await response.json();
-        console.log(data1,data2);
 
         for (let i in data2) {
             stint.push([]);
@@ -175,46 +170,64 @@ async function gatherdata(driver_number){
                 }         
             }
         }
-        console.log(stint);
-        displayTable();
+        driverMap.set(`${name}`, {
+            laptimes: [...stint],
+            tyres: [...stinttyre]
+        });
     } catch (error) {
         console.log(error);
     }
 }
 
-function displayTable() {
+function displayTable(stintmap) {
+    let a = [];
+    let b = [];
+    let d = [];
+    for(let [driver, data] of stintmap){
+        d.push([driver, data.laptimes.length]);
+        for(let i=0; i<data['laptimes'].length; i++){
+            a.push(data.laptimes[i]);
+            b.push(data.tyres[i]);
+            
+        }
+    }
     const container = document.getElementById('table-container');
     let table = '<table border="1">';
     
     table += '<tr>';
-    table += '<th>Stint Number</th>';
-    for (let i = 0; i < stint.length; i++) {
-        table += `<th>${i + 1}</th>`;
+    table += '<th>Driver</th>';
+
+    for (let i = 0; i < d.length; i++) {
+        table+= `<th colspan="${d[i][1]}">${d[i][0]}</th>`
     }
+    
     table += '</tr>';
 
     table += '<tr>';
-    table += '<th>Tyre Compound</th>';
-    for (let i = 0; i < stint.length; i++) {
-        table += `<th>${stinttyre[i]}</th>`;
+    table += '<th>Tyre</th>';
+
+    for (let i = 0; i < a.length; i++) {
+        table += `<th class="${b[i]}">${b[i]}</th>`;
     }
+    
     table += '</tr>';
 
-    let maxLaps = Math.max(...stint.map(s => s.length));
+    let maxLaps = Math.max(...a.map(s => s.length));
     for (let j = 0; j < maxLaps; j++) {
+
         table += '<tr>';
         if (j === 0) {
-            table += '<th rowspan="' + maxLaps + '">Lap Data</th>';
+            table += '<th rowspan="' + maxLaps + '">Laps</th>';
         }
-        for (let i = 0; i < stint.length; i++) {
-            table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${stint[i][j] || ''}</td>`;
+        for (let i = 0; i < a.length; i++) {
+            table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
         }
         table += '</tr>';
     }
 
     table += '<tr>';
     table += '<th>Average</th>';
-    for (let i = 0; i < stint.length; i++) {
+    for (let i = 0; i < a.length; i++) {
         table += `<td id="avg-${i}">0.000</td>`;
     }
     table += '</tr>';
@@ -231,15 +244,15 @@ function displayTable() {
                 cell.classList.remove('deselected');
                 cell.classList.add('selected');
             }
-            updateAverages();
+            updateAverages(a, b);
         });
     });
 
-    updateAverages();
+    updateAverages(a, b);
 }
 
-function updateAverages() {
-    for (let i = 0; i < stint.length; i++) {
+function updateAverages(a, b) {
+    for (let i = 0; i < a.length; i++) {
         let sum = 0;
         let count = 0;
         document.querySelectorAll(`.lap[data-stint="${i}"]`).forEach(cell => {
@@ -262,12 +275,79 @@ function exportToExcel() {
     XLSX.writeFile(wb, 'stint_data.xlsx');
 }
 
-function searchDriver(driver){
+async function searchDriver(driver, name){
   const container = document.getElementById('table-container');
   container.innerHTML = '';
-  stint = [];
-  stinttyre = [];
-  gatherdata(driver);
+  driverMap.clear();
+  const selectedDriver = document.querySelectorAll('#driver-list .choose');
+  const promises = [];
+  selectedDriver.forEach(element=>{
+    const promise = gatherdata(element.value, element.textContent);
+    promises.push(promise);
+  });
+  await Promise.all(promises);
+//   console.log(driverMap);
+  generateStintSelection();
+}
+
+function generateStintSelection() {
+    const formContainer = document.getElementById('driver-stints-form');
+    formContainer.innerHTML = '';
+
+    for (let [driver, data] of driverMap) {
+        const driverDiv = document.createElement('div');
+
+        const driverLabel = document.createElement('label');
+        driverLabel.textContent = `${driver}`;
+        driverLabel.className = 'drivername'
+        driverDiv.appendChild(driverLabel);
+        
+        for (let i = 0; i < data.laptimes.length; i++) {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `stint-${driver}-${i}`;
+            checkbox.value = i;
+            checkbox.checked = true; 
+            
+            const label = document.createElement('label');
+            const stintLapCount = data.laptimes[i].length;
+            const tyreType = data.tyres[i];
+            label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
+            
+            driverDiv.appendChild(checkbox);
+            driverDiv.appendChild(label);
+        }
+        
+        formContainer.appendChild(driverDiv);
+    }
+}
+
+function updateTable(){
+    let stintmap = new Map();
+    for (let [driver, data] of driverMap) {
+        let laps = [];
+        let tyres = [];
+        for (let i = 0; i < data.laptimes.length; i++) {
+            const checkbox = document.getElementById(`stint-${driver}-${i}`);
+            if (checkbox && checkbox.checked) {
+                // console.log(data.tyres[i]);
+                laps.push(data.laptimes[i]);
+                tyres.push(data.tyres[i]);
+            }
+        }
+        if(laps.length!=0){
+            stintmap.set(driver, {
+                laptimes:[...laps],
+                tyres: [...tyres]
+            });
+        }
+        else{
+            stintmap.delete(driver);
+        }
+        
+    }
+    console.log(stintmap);
+    displayTable(stintmap);
 }
 
 createYearlist();
