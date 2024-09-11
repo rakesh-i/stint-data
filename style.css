@@ -23,7 +23,7 @@
     background-color: white;
 }
 .deselected {
-    color: #c1c1c1;
+    color: red;
     background-color: black;
 }
 
@@ -102,7 +102,7 @@ li.choose {
 }
 
 .HARD{
-    background-color: white;
+    background-color:#c1c1c1;
 }
 .MEDIUM{
     background-color: yellow;
@@ -117,4 +117,13 @@ li.choose {
 .WET{
     color: white;
     background-color: blue;
+}
+
+label{
+    font-family: 'f1regular';
+}
+
+.drivername{
+    font-weight: 700;
+    padding: 10px;
 }
