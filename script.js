@@ -183,34 +183,53 @@ function displayTable(stintmap) {
     let a = [];
     let b = [];
     let d = [];
+    let stintnum = new Map();
+    let c = 0;
     for(let [driver, data] of stintmap){
         d.push([driver, data.laptimes.length]);
+        if(c>0){
+            c += data.laptimes.length;
+        }
+        else{
+            c += data.laptimes.length-1;
+        }
+        
+        stintnum.set(c, 1);
         for(let i=0; i<data['laptimes'].length; i++){
             a.push(data.laptimes[i]);
             b.push(data.tyres[i]);
             
         }
     }
+    console.log(stintnum);
     const container = document.getElementById('table-container');
     let table = '<table border="1">';
     
+    // Drivers name
     table += '<tr>';
-    table += '<th>Driver</th>';
-
+    table += '<th class="border-bottom border-right border-left">Driver</th>';
     for (let i = 0; i < d.length; i++) {
-        table+= `<th colspan="${d[i][1]}">${d[i][0]}</th>`
+        table+= `<th class="border-bottom border-right border-left" colspan="${d[i][1]}">${d[i][0]}</th>`
     }
-    
     table += '</tr>';
 
+    // Tyres name
     table += '<tr>';
-    table += '<th>Tyre</th>';
-
+    table += '<th class="border-bottom border-right border-left">Tyre</th>';
     for (let i = 0; i < a.length; i++) {
-        table += `<th class="${b[i]}">${b[i]}</th>`;
+        if(i==0){
+            table += `<th class="${b[i]} border-left border-bottom">${b[i]}</th>`;
+        }
+        else if(stintnum.has(i)){
+            table += `<th class="${b[i]} border-right border-bottom">${b[i]}</th>`;
+        }
+        else{
+            table += `<th class="${b[i]} border-bottom">${b[i]}</th>`;
+        }
+        
     }
-    
     table += '</tr>';
+
 
     let maxLaps = Math.max(...a.map(s => s.length));
     for (let j = 0; j < maxLaps; j++) {
@@ -220,15 +239,37 @@ function displayTable(stintmap) {
             table += '<th rowspan="' + maxLaps + '">Laps</th>';
         }
         for (let i = 0; i < a.length; i++) {
-            table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+            if(i==0){
+                table += `<td class="lap selected border-left" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+            }
+            else if(stintnum.has(i)){
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                
+            }
+            else if(i==a.length-1){
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+            }
+            else{
+                table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+            }
         }
         table += '</tr>';
     }
 
+    // Averages 
     table += '<tr>';
-    table += '<th>Average</th>';
+    table += '<th class="border-top">Average</th>';
     for (let i = 0; i < a.length; i++) {
-        table += `<td id="avg-${i}">0.000</td>`;
+        if(i==0){
+            table += `<td id="avg-${i}" class="border-left border-top">0.000</td>`;
+        }
+        else if(stintnum.has(i)){
+            table += `<td id="avg-${i}" class="border-right border-top">0.000</td>`;
+        }
+        else{
+            table += `<td id="avg-${i}" class="border-top">0.000</td>`;
+        }
+        
     }
     table += '</tr>';
 
@@ -296,6 +337,7 @@ function generateStintSelection() {
 
     for (let [driver, data] of driverMap) {
         const driverDiv = document.createElement('div');
+        driverDiv.className = 'driver-div'
 
         const driverLabel = document.createElement('label');
         driverLabel.textContent = `${driver}`;
@@ -303,6 +345,8 @@ function generateStintSelection() {
         driverDiv.appendChild(driverLabel);
         
         for (let i = 0; i < data.laptimes.length; i++) {
+            const holder = document.createElement('div');
+            holder.className = 'holder';
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = `stint-${driver}-${i}`;
@@ -314,8 +358,9 @@ function generateStintSelection() {
             const tyreType = data.tyres[i];
             label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
             
-            driverDiv.appendChild(checkbox);
-            driverDiv.appendChild(label);
+            holder.appendChild(checkbox);
+            holder.appendChild(label);
+            driverDiv.appendChild(holder);
         }
         
         formContainer.appendChild(driverDiv);
@@ -346,9 +391,23 @@ function updateTable(){
         }
         
     }
-    console.log(stintmap);
+    // console.log(stintmap);
     displayTable(stintmap);
 }
+
+document.getElementById('screenshot-btn').addEventListener('click', function() {
+    let tableContainer = document.getElementById('table-container');
+    
+    // Use html2canvas to capture the table
+    html2canvas(tableContainer).then(function(canvas) {
+        // Convert the canvas to an image and download it
+        let link = document.createElement('a');
+        link.href = canvas.toDataURL();  // Get the image URL from the canvas
+        link.download = 'screenshot.png';  // Set the file name
+        link.click();  // Trigger download
+    });
+});
+
 
 createYearlist();
 
