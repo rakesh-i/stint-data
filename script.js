@@ -199,6 +199,7 @@ function displayTable(stintmap) {
     let d = [];
     let stintnum = new Map();
     let c = 0;
+    stintnum.set(0, 1);
     for(let [driver, data] of stintmap){
         d.push([driver, data.laptimes.length]);
         if(c>0){
