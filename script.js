@@ -5,15 +5,23 @@ function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
     
+    const formlist = document.querySelector('#driver-stints-form');
+    formlist.innerHTML = '';
+
     event.target.classList.add('choose');
     // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(event.target.textContent);
+
 }
 
 function selectRace(event){
     const listRaces = document.querySelectorAll('.race-container li');
     listRaces.forEach(item => item.classList.remove('choose'));
+
+    const formlist = document.querySelector('#driver-stints-form');
+    formlist.innerHTML = '';
+
     event.target.classList.add('choose');
     // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
@@ -23,10 +31,15 @@ function selectRace(event){
 function selectSession(event){
     const listSession = document.querySelectorAll('.session-container li');
     listSession.forEach(item => item.classList.remove('choose'));
+
+    const formlist = document.querySelector('#driver-stints-form');
+    formlist.innerHTML = '';
+
     event.target.classList.add('choose');
     // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     showDriverSearch(event.target.value);
+
 }
 
 function selectDriver(event){
@@ -172,7 +185,8 @@ async function gatherdata(driver_number, name){
         }
         driverMap.set(`${name}`, {
             laptimes: [...stint],
-            tyres: [...stinttyre]
+            tyres: [...stinttyre],
+            num: driver_number
         });
     } catch (error) {
         console.log(error);
@@ -201,8 +215,13 @@ function displayTable(stintmap) {
             
         }
     }
-    console.log(stintnum);
+    
+    // console.log(stintnum);
     const container = document.getElementById('table-container');
+    if(a.length==0){
+        container.innerHTML = '';
+        return;
+    }
     let table = '<table border="1">';
     
     // Drivers name
@@ -337,11 +356,19 @@ function generateStintSelection() {
 
     for (let [driver, data] of driverMap) {
         const driverDiv = document.createElement('div');
-        driverDiv.className = 'driver-div'
+        driverDiv.className = 'driver-div';
+        driverDiv.dataset.driverno = data.num;
 
         const driverLabel = document.createElement('label');
         driverLabel.textContent = `${driver}`;
         driverLabel.className = 'drivername'
+
+        const del = document.createElement('button');
+        del.textContent = 'REMOVE';
+        del.className = 'del-button'
+        del.value = data.num;
+
+        driverDiv.appendChild(del);
         driverDiv.appendChild(driverLabel);
         
         for (let i = 0; i < data.laptimes.length; i++) {
@@ -362,9 +389,26 @@ function generateStintSelection() {
             holder.appendChild(label);
             driverDiv.appendChild(holder);
         }
-        
+
+        del.addEventListener('click', (event)=>{
+            const ul = document.getElementById('driver-list');
+            const list = ul.getElementsByTagName('li');
+            for(let li of list){
+                if(li.getAttribute('value')===event.target.value){
+                    li.classList.toggle('choose');
+                    removeCard(parseInt(event.target.value));
+                }
+            }
+        });
         formContainer.appendChild(driverDiv);
     }
+}
+
+function removeCard(dec){    
+    const card = document.querySelector(`.driver-div[data-driverno="${dec}"]`);
+    // console.log(card);
+    card.remove();
+    updateTable();
 }
 
 function updateTable(){

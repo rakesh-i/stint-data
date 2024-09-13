@@ -156,6 +156,17 @@ label{
     padding: 5px;
 }
 
+button.del-button{
+    height: 20px;
+    width: 100%;
+    color: red;
+    font-weight: 1000;
+    font-size: 12px;
+    padding: 2px;
+    border: none;
+    background-color:#15151e;
+    border-radius: 5px;
+}
 
 /* ------------------------- */
 .border-left {
@@ -190,7 +201,7 @@ th, td {
     gap: 10px;
 }
 
-button{
+#update{
     color: white;
     font-size: 20px;
     padding: 10px;
