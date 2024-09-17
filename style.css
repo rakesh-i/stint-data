@@ -43,7 +43,7 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 10px;
 }
 
 .selection{
@@ -204,7 +204,7 @@ th, td {
 #update{
     color: white;
     font-size: 20px;
-    padding: 10px;
+    padding: 8px;
     border: 2px solid #15151e;
     background-color:red;
     border-radius: 5px;
@@ -226,4 +226,20 @@ th, td {
     border: none;
     background-color:#15151e;
     border-radius: 5px;
+}
+
+.footer-content{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+a{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 2px;
+    font-size: 18px;
+    
 }
