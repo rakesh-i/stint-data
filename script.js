@@ -385,7 +385,6 @@ async function searchDriver(driver, name){
     const selectedDriver = document.querySelectorAll('#driver-list .choose');
     const promises = [];
     selectedDriver.forEach(element=>{
-        console.log(element.textContent);
         const promise = gatherdata(element.value, element.textContent);
         promises.push(promise);
     });
