@@ -1,5 +1,6 @@
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
+let controller = new AbortController();
 
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
@@ -209,7 +210,7 @@ function displayTable(stintmap) {
             c += data.laptimes.length-1;
         }
         x++;
-        console.log(c);
+        // console.log(c);
         stintnum.set(c, 1);
         for(let i=0; i<data['laptimes'].length; i++){
             a.push(data.laptimes[i]);
@@ -217,7 +218,7 @@ function displayTable(stintmap) {
         }
     }
     
-    console.log(stintnum);
+    // console.log(stintnum);
     const container = document.getElementById('table-container');
     if(a.length==0){
         container.innerHTML = '';
@@ -265,23 +266,24 @@ function displayTable(stintmap) {
             table += '<th rowspan="' + maxLaps + '">Laps</th>';
         }
         for (let i = 0; i < a.length; i++) {
+            let timeFormated = convertTime(a[i][j]);
             if(i==0){
                 if(stintnum.has(i)){
-                    table += `<td class="lap selected border-left border-right" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                    table += `<td class="lap selected border-left border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
                 }
                 else{
-                    table += `<td class="lap selected border-left" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                    table += `<td class="lap selected border-left" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
                 }
             }
             else if(stintnum.has(i)){
-                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
                 
             }
             else if(i==a.length-1){
-                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
             }
             else{
-                table += `<td class="lap selected" data-stint="${i}" data-lap="${j}">${a[i][j] || ''}</td>`;
+                table += `<td class="lap selected" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
             }
         }
         table += '</tr>';
@@ -329,13 +331,33 @@ function displayTable(stintmap) {
     updateAverages(a, b);
 }
 
+function convertTime(sss_mmm) {
+    if(!sss_mmm){
+        return '';
+    }
+    let [seconds, milliseconds] = sss_mmm.split('.');
+
+    seconds = parseInt(seconds, 10);
+    
+    let minutes = Math.floor(seconds / 60);
+    let remainingSeconds = seconds % 60;
+
+    if(milliseconds==undefined|| minutes===NaN|| remainingSeconds===NaN){
+        return 'NaN';
+    }
+    
+    let formattedTime = `${String(minutes).padStart(1, '0')}:${String(remainingSeconds).padStart(2, '0')}.${milliseconds}`;
+    
+    return formattedTime;
+}
+
 function updateAverages(a, b) {
     for (let i = 0; i < a.length; i++) {
         let sum = 0;
         let count = 0;
         document.querySelectorAll(`.lap[data-stint="${i}"]`).forEach(cell => {
             if (cell.classList.contains('selected')) {
-                const lapTime = parseFloat(cell.textContent);
+                const lapTime = parseFloat(cell.getAttribute('value'));
                 if (!isNaN(lapTime)) {
                     sum += lapTime;
                     count++;
@@ -343,7 +365,8 @@ function updateAverages(a, b) {
             }
         });
         const average = count === 0 ? 0 : (sum / count).toFixed(3);
-        document.getElementById(`avg-${i}`).textContent = average;
+        let timeFormated = convertTime(average);
+        document.getElementById(`avg-${i}`).textContent = timeFormated;
     }
 }
 
@@ -354,18 +377,20 @@ function exportToExcel() {
 }
 
 async function searchDriver(driver, name){
-  const container = document.getElementById('table-container');
-  container.innerHTML = '';
-  driverMap.clear();
-  const selectedDriver = document.querySelectorAll('#driver-list .choose');
-  const promises = [];
-  selectedDriver.forEach(element=>{
-    const promise = gatherdata(element.value, element.textContent);
-    promises.push(promise);
-  });
-  await Promise.all(promises);
-//   console.log(driverMap);
-  generateStintSelection();
+    controller.abort(); 
+    controller = new AbortController();
+    const container = document.getElementById('table-container');
+    container.innerHTML = '';
+    driverMap.clear();
+    const selectedDriver = document.querySelectorAll('#driver-list .choose');
+    const promises = [];
+    selectedDriver.forEach(element=>{
+        console.log(element.textContent);
+        const promise = gatherdata(element.value, element.textContent);
+        promises.push(promise);
+    });
+    await Promise.all(promises);
+    generateStintSelection();
 }
 
 function generateStintSelection() {
