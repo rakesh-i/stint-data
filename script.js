@@ -437,7 +437,7 @@ function generateStintSelection() {
             const list = ul.getElementsByTagName('li');
             for(let li of list){
                 if(li.getAttribute('value')===event.target.value){
-                    li.classList.toggle('choose');
+                    li.classList.remove('choose');
                     removeCard(parseInt(event.target.value));
                 }
             }
