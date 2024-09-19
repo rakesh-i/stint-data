@@ -10,7 +10,6 @@ function selectYear(event) {
     formlist.innerHTML = '';
 
     event.target.classList.add('choose');
-    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(event.target.textContent);
 
@@ -24,7 +23,6 @@ function selectRace(event){
     formlist.innerHTML = '';
 
     event.target.classList.add('choose');
-    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
     fetchSessions(event.target.textContent);
 }
@@ -37,7 +35,6 @@ function selectSession(event){
     formlist.innerHTML = '';
 
     event.target.classList.add('choose');
-    // console.log(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     showDriverSearch(event.target.value);
 
@@ -121,36 +118,48 @@ function createYearlist(){
 }
 
 async function fetchMeetings(year){
-    let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
-    let data = await meetings.json();
-    // console.log(data); 
-    createRacelist(data);
+    try {
+        let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
+        let data = await meetings.json();
+        createRacelist(data);
+    }
+    catch (error) {
+        console.log(error);
+    }
 }
 
 async function fetchSessions(country) {;
-    const year = document.querySelector('.year-container li.choose').textContent;
-    // console.log(year, country);
+    try {
+        const year = document.querySelector('.year-container li.choose').textContent;
 
-    if (!country) {
-        alert('Please select a country.');
-        return;
+        if (!country) {
+            alert('Please select a country.');
+            return;
+        }
+        let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
+        let data = await session.json();
+
+        createSessionList(data);
+    } catch (error) {
+        console.log(error);
     }
-    let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
-    let data = await session.json();
-    // console.log(data);
-
-    createSessionList(data);
+    
 }
 
 async function showDriverSearch(sessionKey) {
-    let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
-    let data = await drivers.json();
-    // console.log(data);
-    if (!sessionKey) {
-        alert('Please select a session.');
-        return;
+    try {
+        let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
+        let data = await drivers.json();
+
+        if (!sessionKey) {
+            alert('Please select a session.');
+            return;
+        }
+        createDriverList(data);
+    } catch (error) {
+        console.log(error);
     }
-    createDriverList(data);
+    
 }
 
 async function gatherdata(driver_number, name){
@@ -158,10 +167,14 @@ async function gatherdata(driver_number, name){
         const stint = [];
         const stinttyre = [];
         const sessionKey = document.querySelector('#session-list li.choose').value;
-        let response = await fetch(`${apiBaseURL}/laps?session_key=${sessionKey}&driver_number=${driver_number}`);
+        let response = await fetch(`${apiBaseURL}/laps?session_key=${sessionKey}&driver_number=${driver_number}`, { signal: controller.signal });
         const data1 = await response.json();
-        response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`);
+        response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`, { signal: controller.signal });
         const data2 = await response.json();
+
+        if(!data1||!data2){
+            throw new Error('Missing data for driver', driver_number);
+        }
 
         for (let i in data2) {
             stint.push([]);
@@ -371,25 +384,36 @@ function updateAverages(a, b) {
 }
 
 function exportToExcel() {
-    const table = document.querySelector('table');
-    const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
-    XLSX.writeFile(wb, 'stint_data.xlsx');
+    try {
+        const table = document.querySelector('table');
+        const wb = XLSX.utils.table_to_book(table, {sheet: "Sheet1"});
+        XLSX.writeFile(wb, 'stint_data.xlsx');
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
 async function searchDriver(driver, name){
-    controller.abort(); 
-    controller = new AbortController();
-    const container = document.getElementById('table-container');
-    container.innerHTML = '';
-    driverMap.clear();
-    const selectedDriver = document.querySelectorAll('#driver-list .choose');
-    const promises = [];
-    selectedDriver.forEach(element=>{
-        const promise = gatherdata(element.value, element.textContent);
-        promises.push(promise);
-    });
-    await Promise.all(promises);
-    generateStintSelection();
+    try{
+        controller.abort(); 
+        controller = new AbortController();
+        const container = document.getElementById('table-container');
+        container.innerHTML = '';
+        driverMap.clear();
+        const selectedDriver = document.querySelectorAll('#driver-list .choose');
+        const promises = [];
+        selectedDriver.forEach(element=>{
+            const promise = gatherdata(element.value, element.textContent);
+            promises.push(promise);
+        });
+        await Promise.all(promises);
+        generateStintSelection();
+        }
+    catch(error){
+        console.log(error);
+    }
+    
 }
 
 function generateStintSelection() {
@@ -448,7 +472,6 @@ function generateStintSelection() {
 
 function removeCard(dec){    
     const card = document.querySelector(`.driver-div[data-driverno="${dec}"]`);
-    // console.log(card);
     card.remove();
     updateTable();
 }
@@ -477,20 +500,18 @@ function updateTable(){
         }
         
     }
-    // console.log(stintmap);
     displayTable(stintmap);
 }
 
 document.getElementById('screenshot-btn').addEventListener('click', function() {
     let tableContainer = document.getElementById('table-container');
     
-    // Use html2canvas to capture the table
     html2canvas(tableContainer).then(function(canvas) {
-        // Convert the canvas to an image and download it
+        
         let link = document.createElement('a');
-        link.href = canvas.toDataURL();  // Get the image URL from the canvas
-        link.download = 'screenshot.png';  // Set the file name
-        link.click();  // Trigger download
+        link.href = canvas.toDataURL();  
+        link.download = 'screenshot.png';  
+        link.click();  
     });
 });
 
