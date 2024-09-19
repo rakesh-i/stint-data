@@ -156,6 +156,11 @@ label{
     padding: 5px;
 }
 
+button{
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.3s;
+}
+
 button.del-button{
     height: 20px;
     width: 100%;
@@ -243,3 +248,10 @@ a{
     font-size: 18px;
     
 }
+button:active{
+    transform: scale(0.95);
+    background-color: lightgray;
+    color: black;
+}
+
+
