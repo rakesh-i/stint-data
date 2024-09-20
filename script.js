@@ -43,7 +43,7 @@ function selectSession(event){
 function selectDriver(event){
     const listDriver = document.querySelectorAll('#driver-list li');
     event.target.classList.toggle('choose');
-    searchDriver(event.target.value, event.target.textContent);
+    searchDriver();
 }
 
 function createDriverList(data){
@@ -394,7 +394,7 @@ function exportToExcel() {
     
 }
 
-async function searchDriver(driver, name){
+async function searchDriver(){
     try{
         controller.abort(); 
         controller = new AbortController();
@@ -402,16 +402,23 @@ async function searchDriver(driver, name){
         container.innerHTML = '';
         driverMap.clear();
         const selectedDriver = document.querySelectorAll('#driver-list .choose');
-        const promises = [];
-        selectedDriver.forEach(element=>{
-            const promise = gatherdata(element.value, element.textContent);
-            promises.push(promise);
-        });
-        await Promise.all(promises);
+        if(selectedDriver.length!=0){
+            document.getElementById('selectall').classList.add('clicked');
+            document.getElementById('selectall').textContent = 'Unselect All';
+        }
+        if(selectedDriver.length==0){
+            document.getElementById('selectall').classList.remove('clicked');
+            document.getElementById('selectall').textContent = 'Select All';
+        }
+        for (let i = 0; i < selectedDriver.length; i++) {
+            const element = selectedDriver[i];
+            await gatherdata(element.value, element.textContent);
+        }
         generateStintSelection();
         }
     catch(error){
         console.log(error);
+        document.getElementById('loading-screen').style.display = 'none';
     }
     
 }
@@ -419,6 +426,7 @@ async function searchDriver(driver, name){
 function generateStintSelection() {
     const formContainer = document.getElementById('driver-stints-form');
     formContainer.innerHTML = '';
+    document.getElementById('loading-screen').style.display = 'none';
 
     for (let [driver, data] of driverMap) {
         const driverDiv = document.createElement('div');
@@ -513,6 +521,24 @@ document.getElementById('screenshot-btn').addEventListener('click', function() {
         link.download = 'screenshot.png';  
         link.click();  
     });
+});
+
+document.getElementById('selectall').addEventListener('click', function(){
+    if(this.classList.contains('clicked')){
+        this.classList.remove('clicked');
+        const listDriver = document.querySelectorAll('#driver-list li');
+        listDriver.forEach(item=> item.classList.remove('choose'));
+        this.textContent = 'Select All';
+        searchDriver();
+    }
+    else{
+        document.getElementById('loading-screen').style.display = 'flex';
+        this.classList.add('clicked');
+        const listDriver = document.querySelectorAll('#driver-list li');
+        listDriver.forEach(item=> item.classList.add('choose'));
+        this.textContent = 'Unselect All';
+        searchDriver();
+    }
 });
 
 
