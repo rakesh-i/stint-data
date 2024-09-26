@@ -138,11 +138,13 @@ li.choose {
 }
 
 label{
-    font-family: 'f1regular';
+    /* font-family: 'f1regular'; */
+    font-family: 'Roboto';
     font-size: 14px;
 }
 
 .drivername{
+    font-family: 'f1regular';
     display: block;
     font-size: 18px;
     font-weight: 700;
