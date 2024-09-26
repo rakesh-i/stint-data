@@ -1,7 +1,8 @@
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
-
+let conList = ['McLaren', 'Red Bull Racing', 'Ferrari', 'Mercedes', 'Aston Martin', 'RB', 'Haas F1 Team', 'Williams', 'Alpine', 'Kick Sauber'];
+let curYear = 2024;
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
@@ -10,6 +11,7 @@ function selectYear(event) {
     formlist.innerHTML = '';
 
     event.target.classList.add('choose');
+    curYear = parseInt(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(event.target.textContent);
 
@@ -52,6 +54,8 @@ function createDriverList(data){
     data.forEach(x=>{
         const driver = document.createElement('li');
         driver.value = x.driver_number;
+        driver.dataset.team = x.team_name;
+        driver.dataset.team_color = x.team_colour;
         driver.textContent = x.broadcast_name;
         driverList.appendChild(driver);
     });
@@ -133,7 +137,7 @@ async function fetchSessions(country) {;
         const year = document.querySelector('.year-container li.choose').textContent;
 
         if (!country) {
-            alert('Please select a country.');
+            alert('Please select l_name country.');
             return;
         }
         let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
@@ -152,7 +156,7 @@ async function showDriverSearch(sessionKey) {
         let data = await drivers.json();
 
         if (!sessionKey) {
-            alert('Please select a session.');
+            alert('Please select l_name session.');
             return;
         }
         createDriverList(data);
@@ -162,7 +166,7 @@ async function showDriverSearch(sessionKey) {
     
 }
 
-async function gatherdata(driver_number, name){
+async function gatherdata(driver_number, name, team, team_color){
     try {
         const stint = [];
         const stinttyre = [];
@@ -200,7 +204,9 @@ async function gatherdata(driver_number, name){
         driverMap.set(`${name}`, {
             laptimes: [...stint],
             tyres: [...stinttyre],
-            num: driver_number
+            num: driver_number, 
+            team_name: team,
+            team_color: team_color
         });
     } catch (error) {
         console.log(error);
@@ -208,14 +214,14 @@ async function gatherdata(driver_number, name){
 }
 
 function displayTable(stintmap) {
-    let a = [];
-    let b = [];
-    let d = [];
+    let l_name = [];
+    let t_name = [];
+    let d_name = [];
     let stintnum = new Map();
     let c = 0;
     let x = 0;
     for(let [driver, data] of stintmap){
-        d.push([driver, data.laptimes.length]);
+        d_name.push([driver, data.laptimes.length, data.team_color]);
         if(x>0){
             c += data.laptimes.length;
         }
@@ -223,17 +229,18 @@ function displayTable(stintmap) {
             c += data.laptimes.length-1;
         }
         x++;
-        // console.log(c);
         stintnum.set(c, 1);
         for(let i=0; i<data['laptimes'].length; i++){
-            a.push(data.laptimes[i]);
-            b.push(data.tyres[i]);
+            l_name.push(data.laptimes[i]);
+            t_name.push(data.tyres[i]);
         }
     }
+
+    // console.log(l_name, t_name, d_name);
     
     // console.log(stintnum);
     const container = document.getElementById('table-container');
-    if(a.length==0){
+    if(l_name.length==0){
         container.innerHTML = '';
         return;
     }
@@ -242,61 +249,61 @@ function displayTable(stintmap) {
     // Drivers name
     table += '<tr>';
     table += '<th class="border-bottom border-right border-left">Driver</th>';
-    for (let i = 0; i < d.length; i++) {
-        table+= `<th class="border-bottom border-right border-left" colspan="${d[i][1]}">${d[i][0]}</th>`
+    for (let i = 0; i < d_name.length; i++) {
+        table+= `<th class="border-bottom border-right border-left" style="background-color:#${d_name[i][2]}" colspan="${d_name[i][1]}">${d_name[i][0]}</th>`
     }
     table += '</tr>';
 
     // Tyres name
     table += '<tr>';
     table += '<th class="border-bottom border-right border-left">Tyre</th>';
-    for (let i = 0; i < a.length; i++) {
+    for (let i = 0; i < l_name.length; i++) {
         if(i==0){
             if(stintnum.has(i)){
-                table += `<th class="${b[i]} border-left border-right border-bottom">${b[i]}</th>`;
+                table += `<th class="${t_name[i]} border-left border-right border-bottom">${t_name[i]}</th>`;
             }
             else{
-                table += `<th class="${b[i]} border-left border-bottom">${b[i]}</th>`;
+                table += `<th class="${t_name[i]} border-left border-bottom">${t_name[i]}</th>`;
             }
             
         }
         else if(stintnum.has(i)){
-            table += `<th class="${b[i]} border-right border-bottom">${b[i]}</th>`;
+            table += `<th class="${t_name[i]} border-right border-bottom">${t_name[i]}</th>`;
         }
         else{
-            table += `<th class="${b[i]} border-bottom">${b[i]}</th>`;
+            table += `<th class="${t_name[i]} border-bottom">${t_name[i]}</th>`;
         }
         
     }
     table += '</tr>';
 
 
-    let maxLaps = Math.max(...a.map(s => s.length));
+    let maxLaps = Math.max(...l_name.map(s => s.length));
     for (let j = 0; j < maxLaps; j++) {
 
         table += '<tr>';
         if (j === 0) {
             table += '<th rowspan="' + maxLaps + '">Laps</th>';
         }
-        for (let i = 0; i < a.length; i++) {
-            let timeFormated = convertTime(a[i][j]);
+        for (let i = 0; i < l_name.length; i++) {
+            let timeFormated = convertTime(l_name[i][j]);
             if(i==0){
                 if(stintnum.has(i)){
-                    table += `<td class="lap selected border-left border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
+                    table += `<td class="lap selected border-left border-right" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
                 }
                 else{
-                    table += `<td class="lap selected border-left" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
+                    table += `<td class="lap selected border-left" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
                 }
             }
             else if(stintnum.has(i)){
-                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
                 
             }
-            else if(i==a.length-1){
-                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
+            else if(i==l_name.length-1){
+                table += `<td class="lap selected border-right" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
             }
             else{
-                table += `<td class="lap selected" data-stint="${i}" data-lap="${j}" value="${a[i][j] || ''}">${timeFormated || ''}</td>`;
+                table += `<td class="lap selected" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
             }
         }
         table += '</tr>';
@@ -305,7 +312,7 @@ function displayTable(stintmap) {
     // Averages 
     table += '<tr>';
     table += '<th class="border-top">Average</th>';
-    for (let i = 0; i < a.length; i++) {
+    for (let i = 0; i < l_name.length; i++) {
         if(i==0){
             if(stintnum.has(i)){
                 table += `<td id="avg-${i}" class="border-left border-right border-top">0.000</td>`;
@@ -337,11 +344,11 @@ function displayTable(stintmap) {
                 cell.classList.remove('deselected');
                 cell.classList.add('selected');
             }
-            updateAverages(a, b);
+            updateAverages(l_name, t_name);
         });
     });
 
-    updateAverages(a, b);
+    updateAverages(l_name, t_name);
 }
 
 function convertTime(sss_mmm) {
@@ -364,8 +371,8 @@ function convertTime(sss_mmm) {
     return formattedTime;
 }
 
-function updateAverages(a, b) {
-    for (let i = 0; i < a.length; i++) {
+function updateAverages(l_name, t_name) {
+    for (let i = 0; i < l_name.length; i++) {
         let sum = 0;
         let count = 0;
         document.querySelectorAll(`.lap[data-stint="${i}"]`).forEach(cell => {
@@ -412,7 +419,7 @@ async function searchDriver(){
         }
         for (let i = 0; i < selectedDriver.length; i++) {
             const element = selectedDriver[i];
-            await gatherdata(element.value, element.textContent);
+            await gatherdata(element.value, element.textContent, element.dataset.team, element.dataset.team_color);
         }
         generateStintSelection();
         }
@@ -428,12 +435,28 @@ function generateStintSelection() {
     formContainer.innerHTML = '';
     document.getElementById('loading-screen').style.display = 'none';
 
+    let array = [...driverMap];
+    if(curYear==2024){
+        array.sort((a, b)=>{
+            return conList.indexOf(a[1].team_name) - conList.indexOf(b[1].team_name);
+        });
+    }
+    else{
+        array.sort((a, b)=>{
+            if (a[1].team_name < b[1].team_name) return -1;
+            if (a[1].team_name > b[1].team_name) return 1;
+            return 0;
+        });
+    }
+    
+    driverMap = new Map(array);
+
     for (let [driver, data] of driverMap) {
         const driverDiv = document.createElement('div');
         driverDiv.className = 'driver-div';
         driverDiv.dataset.driverno = data.num;
 
-        const driverLabel = document.createElement('label');
+        const driverLabel = document.createElement('div');
         driverLabel.textContent = `${driver}`;
         driverLabel.className = 'drivername'
 
@@ -456,6 +479,7 @@ function generateStintSelection() {
             
             const label = document.createElement('label');
             const stintLapCount = data.laptimes[i].length;
+            label.htmlFor = `stint-${driver}-${i}`;
             const tyreType = data.tyres[i];
             label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
             
@@ -492,7 +516,6 @@ function updateTable(){
         for (let i = 0; i < data.laptimes.length; i++) {
             const checkbox = document.getElementById(`stint-${driver}-${i}`);
             if (checkbox && checkbox.checked) {
-                // console.log(data.tyres[i]);
                 laps.push(data.laptimes[i]);
                 tyres.push(data.tyres[i]);
             }
@@ -500,7 +523,9 @@ function updateTable(){
         if(laps.length!=0){
             stintmap.set(driver, {
                 laptimes:[...laps],
-                tyres: [...tyres]
+                tyres: [...tyres],
+                team_name: data.team_name,
+                team_color: data.team_color
             });
         }
         else{
@@ -508,6 +533,7 @@ function updateTable(){
         }
         
     }
+
     displayTable(stintmap);
 }
 
