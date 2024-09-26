@@ -1,7 +1,8 @@
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
-
+let conList = ['McLaren', 'Red Bull Racing', 'Ferrari', 'Mercedes', 'Aston Martin', 'RB', 'Haas F1 Team', 'Williams', 'Alpine', 'Kick Sauber'];
+let curYear = 2024;
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
@@ -10,6 +11,7 @@ function selectYear(event) {
     formlist.innerHTML = '';
 
     event.target.classList.add('choose');
+    curYear = parseInt(event.target.textContent);
     event.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     fetchMeetings(event.target.textContent);
 
@@ -47,7 +49,6 @@ function selectDriver(event){
 }
 
 function createDriverList(data){
-    console.log(data);
     const driverList = document.querySelector('#driver-list');
     driverList.innerHTML = '';
     data.forEach(x=>{
@@ -435,11 +436,19 @@ function generateStintSelection() {
     document.getElementById('loading-screen').style.display = 'none';
 
     let array = [...driverMap];
-    array.sort((a, b)=>{
-        if (a[1].team_name < b[1].team_name) return -1;
-        if (a[1].team_name > b[1].team_name) return 1;
-        return 0;
-    });
+    if(curYear==2024){
+        array.sort((a, b)=>{
+            return conList.indexOf(a[1].team_name) - conList.indexOf(b[1].team_name);
+        });
+    }
+    else{
+        array.sort((a, b)=>{
+            if (a[1].team_name < b[1].team_name) return -1;
+            if (a[1].team_name > b[1].team_name) return 1;
+            return 0;
+        });
+    }
+    
     driverMap = new Map(array);
 
     for (let [driver, data] of driverMap) {
@@ -447,7 +456,7 @@ function generateStintSelection() {
         driverDiv.className = 'driver-div';
         driverDiv.dataset.driverno = data.num;
 
-        const driverLabel = document.createElement('label');
+        const driverLabel = document.createElement('div');
         driverLabel.textContent = `${driver}`;
         driverLabel.className = 'drivername'
 
@@ -470,6 +479,7 @@ function generateStintSelection() {
             
             const label = document.createElement('label');
             const stintLapCount = data.laptimes[i].length;
+            label.htmlFor = `stint-${driver}-${i}`;
             const tyreType = data.tyres[i];
             label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
             
@@ -523,6 +533,7 @@ function updateTable(){
         }
         
     }
+
     displayTable(stintmap);
 }
 
@@ -531,7 +542,7 @@ document.getElementById('screenshot-btn').addEventListener('click', function() {
     
     html2canvas(tableContainer).then(function(canvas) {
         
-        let link = document.createElement('l_name');
+        let link = document.createElement('a');
         link.href = canvas.toDataURL();  
         link.download = 'screenshot.png';  
         link.click();  
