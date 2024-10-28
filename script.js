@@ -1,7 +1,7 @@
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
-let conList = ['McLaren', 'Red Bull Racing', 'Ferrari', 'Mercedes', 'Aston Martin', 'RB', 'Haas F1 Team', 'Williams', 'Alpine', 'Kick Sauber'];
+let conList = ['McLaren', 'Ferrari', 'Red Bull Racing', 'Mercedes', 'Aston Martin', 'RB', 'Haas F1 Team', 'Williams', 'Alpine', 'Kick Sauber'];
 let curYear = 2024;
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
