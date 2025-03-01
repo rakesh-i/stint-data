@@ -2,7 +2,7 @@ const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
 let conList = ['McLaren', 'Ferrari', 'Red Bull Racing', 'Mercedes', 'Aston Martin', 'Alpine', 'Haas F1 Team', 'RB', 'Williams', 'Kick Sauber','null', null];
-let curYear = 2024;
+let curYear = 2025;
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
@@ -53,7 +53,7 @@ function createDriverList(data){
     driverList.innerHTML = '';
     
     let array = [...data];
-    if(curYear==2024){
+    if(curYear==2025){
         array.sort((a, b)=>{
             return conList.indexOf(a.team_name) - conList.indexOf(b.team_name);
         });
