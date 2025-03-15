@@ -3,6 +3,7 @@ let driverMap = new Map();
 let controller = new AbortController();
 let conList = ['McLaren', 'Ferrari', 'Red Bull Racing', 'Mercedes', 'Aston Martin', 'Alpine', 'Haas F1 Team', 'RB', 'Williams', 'Kick Sauber','null', null];
 let curYear = 2025;
+
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
@@ -245,7 +246,8 @@ function displayTable(stintmap) {
 
     // console.log(l_name, t_name, d_name);
     
-    // console.log(stintnum);
+    // console.log(stintmap);
+
     const container = document.getElementById('table-container');
     if(l_name.length==0){
         container.innerHTML = '';
@@ -541,9 +543,97 @@ function updateTable(){
         }
         
     }
+    
+    let traces = [];
+    let traceData = [];
+    let allLapTimes = [];
+    
+    stintmap.forEach((data, driver) => {
+        data.laptimes.forEach((stint, index) => {
+            // let stint = data.laptimes[i];
+            let median = getMedian(stint);
+            traceData.push({
+                median: median,
+                trace:{
+                    y: removeOutliers(stint),
+                    type: "box",
+                    boxpoints: false,
+                    jitter: 0.5,
+                    whiskerwidth: 0.2,
+                    name: `${driver}`,
+                    marker: { color: data.team_color,  size: 2 },
+                    line:{
+                        width: 1
+                    }
+                }
+            });
+        });
+    });
+    // console.log(allLapTimes);
+    // console.log(traces);
+    // Layout configuration
+    let layout = {
+        title: "Lap Times by Driver and Tyre",
+        yaxis: { autorange: true,
+                showgrid: true,
+                zeroline: true,
+                dtick: 5,
+                gridcolor: 'rgb(255, 255, 255)',
+                gridwidth: 1,
+                zerolinecolor: 'rgb(255, 0, 0)',
+                zerolinewidth: 2,
+                dtick: 2
+            },
+            margin: {
+                l: 40,
+                r: 30,
+                b: 80,
+                t: 100
+            },
+            paper_bgcolor: 'rgb(243, 243, 243)',
+            plot_bgcolor: 'rgb(243, 243, 243)',
+            showlegend: false 
+        
+    };
+
+    // Sort traces by median lap time
+    traceData.sort((a, b) => a.median - b.median); // Ascending order (fastest first)
+
+    // Extract sorted traces
+    traces = traceData.map(item => item.trace);
+
+    // Render the plot
+    Plotly.newPlot("boxPlot", traces, layout);
 
     displayTable(stintmap);
 }
+
+function getMedian(arr) {
+    let sorted = [...arr].filter(v => v !== 'NaN' && !isNaN(v)).map(v => parseFloat(v)).sort((a, b) => a - b);
+    let mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+function removeOutliers(data, threshold = 1.1) {
+    let cleanedData = data
+        .filter(val => val !== 'NaN' && !isNaN(val)) // Remove 'NaN' text & actual NaNs
+        .map(val => parseFloat(val)); // Convert to numbers
+
+    if (cleanedData.length < 4) return cleanedData; // Too few data points
+
+    let sorted = cleanedData.sort((a, b) => a - b);
+    let q1 = sorted[Math.floor(sorted.length / 4)];
+    let q3 = sorted[Math.ceil(sorted.length * (3 / 4)) - 1];
+    let iqr = q3 - q1;
+    
+    let lowerBound = q1 - parseFloat(threshold) * iqr;
+    let upperBound = q3 + parseFloat(threshold) * iqr;
+    // console.log(sorted, q1, q3, iqr, lowerBound,upperBound);
+    let asdf = sorted.filter(val => val >= lowerBound && val <= upperBound);
+    // console.log(asdf);
+    return asdf;
+}
+
 
 document.getElementById('screenshot-btn').addEventListener('click', function() {
     let tableContainer = document.getElementById('table-container');
@@ -573,6 +663,15 @@ document.getElementById('selectall').addEventListener('click', function(){
         this.textContent = 'Unselect All';
         searchDriver();
     }
+});
+
+document.getElementById("downloadPlot").addEventListener("click", function () {
+    Plotly.downloadImage("plot", {
+        format: "png",  // Change to 'svg', 'jpeg', or 'webp' if needed
+        width: 1920,    // Ensures high resolution
+        height: 1080,   // At least 1080p
+        filename: "lap_times_plot"
+    });
 });
 
 
