@@ -41,16 +41,26 @@
                 <ul id="driver-list">
                 </ul>
             </div>
+            <div id="search">
+                <button id="searchButton">SEARCH</button>
+                <button id="selectall">SELECT ALL</button>
+            </div>
+            
         </div>
     </div>
+    <div id="divider">
 
-    <button id="selectall">Select All</button>
+    </div>
+
+   
+    
 
     <div id="driver-stints-form"></div>
-    <button id="update" onclick="updateTable()">Update Table</button>
+    <button id="update" onclick="updateTable()">UPDATE TABLE</button>
     <div id="loading-screen" style="display: none;">
         <div class="spinner"></div>
     </div>
+    <div id="boxPlot" style="width: 95%;"></div>
     
     <div class="table">
         <div id="table-container"></div>
@@ -81,5 +91,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.0.min.js" charset="utf-8"></script>
 </body>
 </html>
