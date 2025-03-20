@@ -421,6 +421,8 @@ async function searchDriver(){
         document.getElementById('loading-screen').style.display = 'flex';
         const container = document.getElementById('table-container');
         container.innerHTML = '';
+        const box = document.getElementById('boxPlot');
+        box.innerHTML = '';
         driverMap.clear();
         const selectedDriver = document.querySelectorAll('#driver-list .choose');
         if(selectedDriver.length!=0){
