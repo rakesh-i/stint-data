@@ -41,18 +41,26 @@
                 <ul id="driver-list">
                 </ul>
             </div>
+            <div id="search">
+                <button id="searchButton">SEARCH</button>
+                <button id="selectall">SELECT ALL</button>
+            </div>
+            
         </div>
     </div>
+    <div id="divider">
 
-    <button id="selectall">Select All</button>
+    </div>
+
+   
+    
 
     <div id="driver-stints-form"></div>
-    <button id="update" onclick="updateTable()">Update Table</button>
+    <button id="update" onclick="updateTable()">UPDATE TABLE</button>
     <div id="loading-screen" style="display: none;">
         <div class="spinner"></div>
     </div>
-
-    <div id="boxPlot" style="width: 100%;"></div>
+    <div id="boxPlot" style="width: 95%;"></div>
     
     <div class="table">
         <div id="table-container"></div>
@@ -61,8 +69,6 @@
         <button onclick="exportToExcel()">Export to Excel</button>
         <button id="screenshot-btn">Take Screenshot</button>
     </div>
-    <button id="downloadPlot">Download Plot</button>
-    <div id="plot"></div>
 
     <footer>
         <div class="footer-content">

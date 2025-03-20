@@ -1,7 +1,7 @@
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
-let conList = ['McLaren', 'Ferrari', 'Red Bull Racing', 'Mercedes', 'Aston Martin', 'Alpine', 'Haas F1 Team', 'RB', 'Williams', 'Kick Sauber','null', null];
+let conList = ['McLaren', 'Mercedes', 'Red Bull Racing', 'Williams', 'Aston Martin', 'Kick Sauber', 'Ferrari',  'Alpine',  'Racing Bulls', 'Haas F1 Team', 'null', null];
 let curYear = 2025;
 
 function selectYear(event) {
@@ -44,9 +44,10 @@ function selectSession(event){
 }
 
 function selectDriver(event){
+    
     const listDriver = document.querySelectorAll('#driver-list li');
     event.target.classList.toggle('choose');
-    searchDriver();
+    // searchDriver();
 }
 
 function createDriverList(data){
@@ -191,7 +192,6 @@ async function gatherdata(driver_number, name, team, team_color){
         for (let i in data2) {
             stint.push([]);
         }
-
         for (let i in data2) {
             let start = data2[i].lap_start;
             let end = data2[i].lap_end;
@@ -246,11 +246,13 @@ function displayTable(stintmap) {
 
     // console.log(l_name, t_name, d_name);
     
-    // console.log(stintmap);
+    // console.log(driverMap);
 
     const container = document.getElementById('table-container');
+    const box = document.getElementById('boxPlot');
     if(l_name.length==0){
         container.innerHTML = '';
+        box.innerHTML = '';
         return;
     }
     let table = '<table border="1">';
@@ -354,10 +356,12 @@ function displayTable(stintmap) {
                 cell.classList.add('selected');
             }
             updateAverages(l_name, t_name);
+            updatePlot();
         });
     });
 
     updateAverages(l_name, t_name);
+    
 }
 
 function convertTime(sss_mmm) {
@@ -414,17 +418,18 @@ async function searchDriver(){
     try{
         controller.abort(); 
         controller = new AbortController();
+        document.getElementById('loading-screen').style.display = 'flex';
         const container = document.getElementById('table-container');
         container.innerHTML = '';
         driverMap.clear();
         const selectedDriver = document.querySelectorAll('#driver-list .choose');
         if(selectedDriver.length!=0){
             document.getElementById('selectall').classList.add('clicked');
-            document.getElementById('selectall').textContent = 'Unselect All';
+            document.getElementById('selectall').textContent = 'UNSELECT ALL';
         }
         if(selectedDriver.length==0){
             document.getElementById('selectall').classList.remove('clicked');
-            document.getElementById('selectall').textContent = 'Select All';
+            document.getElementById('selectall').textContent = 'SELECT ALL';
         }
         for (let i = 0; i < selectedDriver.length; i++) {
             const element = selectedDriver[i];
@@ -445,7 +450,7 @@ function generateStintSelection() {
     document.getElementById('loading-screen').style.display = 'none';
 
     let array = [...driverMap];
-    if(curYear==2024){
+    if(curYear==2025){
         array.sort((a, b)=>{
             return conList.indexOf(a[1].team_name) - conList.indexOf(b[1].team_name);
         });
@@ -518,6 +523,157 @@ function removeCard(dec){
     updateTable();
 }
 
+function updatePlot() {
+    let stintmap = new Map();
+    const table = document.querySelector("table");
+    if (!table) return;
+
+    const rows = table.querySelectorAll("tr");
+    let drivers = [];
+    let stintCounts = []; // Number of stints per driver
+    let tyres = [];
+    let teamColors = [];
+    let stintLapTimes = [];
+
+    // Step 1: Get Drivers, Stint Counts, and Team Colors
+    const driverCells = rows[0].querySelectorAll("th");
+    for (let i = 1; i < driverCells.length; i++) { // Skip first cell (header)
+        let driver = driverCells[i].textContent.trim();
+        let stintCount = parseInt(driverCells[i].getAttribute("colspan")) || 1;
+        let teamColor = driverCells[i].style.backgroundColor || "#000000"; // Default to black if missing
+
+        drivers.push(driver);
+        stintCounts.push(stintCount);
+        teamColors.push(teamColor);
+    }
+
+    // Step 2: Get Tyres for Each Stint
+    const tyreCells = rows[1].querySelectorAll("th");
+    for (let i = 1; i < tyreCells.length; i++) { // Skip first cell (header)
+        tyres.push(tyreCells[i].textContent.trim());
+    }
+
+    // Step 3: Initialize Stint Arrays
+    let driverIndex = 0;
+    let stintIndex = 0;
+    let driverStints = new Map();
+
+    drivers.forEach((driver, i) => {
+        driverStints.set(driver, { laptimes: [], tyres: [], teamColor: teamColors[i] });
+        for (let j = 0; j < stintCounts[i]; j++) {
+            driverStints.get(driver).laptimes.push([]);
+            driverStints.get(driver).tyres.push(tyres[stintIndex]);
+            stintIndex++;
+        }
+    });
+
+    // Step 4: Extract Lap Times Row by Row
+    for (let rowIndex = 2; rowIndex < rows.length - 1; rowIndex++) { // Skip first 2 rows and last row (Average)
+        const lapCells = rows[rowIndex].querySelectorAll("td");
+        stintIndex = 0;
+        driverIndex = 0;
+
+        for (let i = 0; i < lapCells.length; i++) {
+            let time = lapCells[i].getAttribute("value");
+            let numericTime = time === "NaN" ? NaN : parseFloat(time);
+
+            if (lapCells[i].classList.contains("selected")) {
+                driverStints.get(drivers[driverIndex]).laptimes[stintIndex].push(numericTime);
+            }
+
+            // Move to next stint
+            stintIndex++;
+            if (stintIndex >= stintCounts[driverIndex]) {
+                stintIndex = 0;
+                driverIndex++;
+            }
+        }
+    }
+
+    // Step 5: Store Data in stintmap
+    driverStints.forEach((data, driver) => {
+        stintmap.set(driver, {
+            laptimes: data.laptimes,
+            tyres: data.tyres,
+            teamColor: data.teamColor
+        });
+    });
+
+    // Step 6: Plot the Box Chart
+    let traces = [];
+    let traceData = [];
+
+    stintmap.forEach((data, driver) => {
+        let tyreCount = {}; // Track count of each tyre type
+
+        data.laptimes.forEach((stint, index) => {
+            let filteredLaps = removeOutliers(stint);
+            let median = getMedian(filteredLaps);
+            let tyre = data.tyres[index].slice(0, 3).toUpperCase();
+            let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
+
+            // If multiple stints on the same tyre, number them
+            if (!tyreCount[tyre]) {
+                tyreCount[tyre] = 1;
+            } else {
+                tyreCount[tyre]++;
+                tyre += ` (${tyreCount[tyre]})`; // Append number
+            }
+
+            traceData.push({
+                median: median,
+                trace: {
+                    y: filteredLaps,
+                    type: "box",
+                    boxpoints: false,
+                    name: `${lastName}-${tyre}`,
+                    marker: { color: data.teamColor, size: 2 },
+                    jitter: 0.5,
+                    whiskerwidth: 0.2,
+                    line: { width: 1 }
+                }
+            });
+        });
+    });
+
+    traceData.sort((a, b) => a.median - b.median);
+    traces = traceData.map(item => item.trace);
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
+    let config = {
+        toImageButtonOptions: {
+          format: 'svg', // one of png, svg, jpeg, webp
+          filename: `plot_${timestamp}`,
+          height: 1080,
+          width: 1920,
+          scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
+        }
+    };
+
+    let layout = {
+        title: "Lap Times by Driver",
+        yaxis: { 
+            autorange: true, 
+            showgrid: true,
+            gridcolor: 'rgb(255, 255, 255)',
+            gridwidth: 1,
+         },
+        margin: {
+            l: 40,
+            r: 30,
+            b: 40,
+            t: 30
+        },
+        paper_bgcolor: "rgb(255,255,255)",
+        plot_bgcolor: "rgb(243,243,243)",
+        showlegend: false
+    };
+
+    Plotly.newPlot("boxPlot", traces, layout, config);
+}
+
+
 function updateTable(){
     let stintmap = new Map();
     for (let [driver, data] of driverMap) {
@@ -543,69 +699,9 @@ function updateTable(){
         }
         
     }
-    
-    let traces = [];
-    let traceData = [];
-    let allLapTimes = [];
-    
-    stintmap.forEach((data, driver) => {
-        data.laptimes.forEach((stint, index) => {
-            // let stint = data.laptimes[i];
-            let median = getMedian(stint);
-            traceData.push({
-                median: median,
-                trace:{
-                    y: removeOutliers(stint),
-                    type: "box",
-                    boxpoints: false,
-                    jitter: 0.5,
-                    whiskerwidth: 0.2,
-                    name: `${driver}`,
-                    marker: { color: data.team_color,  size: 2 },
-                    line:{
-                        width: 1
-                    }
-                }
-            });
-        });
-    });
-    // console.log(allLapTimes);
-    // console.log(traces);
-    // Layout configuration
-    let layout = {
-        title: "Lap Times by Driver and Tyre",
-        yaxis: { autorange: true,
-                showgrid: true,
-                zeroline: true,
-                dtick: 5,
-                gridcolor: 'rgb(255, 255, 255)',
-                gridwidth: 1,
-                zerolinecolor: 'rgb(255, 0, 0)',
-                zerolinewidth: 2,
-                dtick: 2
-            },
-            margin: {
-                l: 40,
-                r: 30,
-                b: 80,
-                t: 100
-            },
-            paper_bgcolor: 'rgb(243, 243, 243)',
-            plot_bgcolor: 'rgb(243, 243, 243)',
-            showlegend: false 
-        
-    };
-
-    // Sort traces by median lap time
-    traceData.sort((a, b) => a.median - b.median); // Ascending order (fastest first)
-
-    // Extract sorted traces
-    traces = traceData.map(item => item.trace);
-
-    // Render the plot
-    Plotly.newPlot("boxPlot", traces, layout);
 
     displayTable(stintmap);
+    updatePlot();
 }
 
 function getMedian(arr) {
@@ -622,16 +718,7 @@ function removeOutliers(data, threshold = 1.1) {
     if (cleanedData.length < 4) return cleanedData; // Too few data points
 
     let sorted = cleanedData.sort((a, b) => a - b);
-    let q1 = sorted[Math.floor(sorted.length / 4)];
-    let q3 = sorted[Math.ceil(sorted.length * (3 / 4)) - 1];
-    let iqr = q3 - q1;
-    
-    let lowerBound = q1 - parseFloat(threshold) * iqr;
-    let upperBound = q3 + parseFloat(threshold) * iqr;
-    // console.log(sorted, q1, q3, iqr, lowerBound,upperBound);
-    let asdf = sorted.filter(val => val >= lowerBound && val <= upperBound);
-    // console.log(asdf);
-    return asdf;
+    return sorted;
 }
 
 
@@ -652,7 +739,7 @@ document.getElementById('selectall').addEventListener('click', function(){
         this.classList.remove('clicked');
         const listDriver = document.querySelectorAll('#driver-list li');
         listDriver.forEach(item=> item.classList.remove('choose'));
-        this.textContent = 'Select All';
+        this.textContent = 'SELECT ALL';
         searchDriver();
     }
     else{
@@ -660,19 +747,13 @@ document.getElementById('selectall').addEventListener('click', function(){
         this.classList.add('clicked');
         const listDriver = document.querySelectorAll('#driver-list li');
         listDriver.forEach(item=> item.classList.add('choose'));
-        this.textContent = 'Unselect All';
+        this.textContent = 'UNSELECT ALL';
         searchDriver();
     }
 });
 
-document.getElementById("downloadPlot").addEventListener("click", function () {
-    Plotly.downloadImage("plot", {
-        format: "png",  // Change to 'svg', 'jpeg', or 'webp' if needed
-        width: 1920,    // Ensures high resolution
-        height: 1080,   // At least 1080p
-        filename: "lap_times_plot"
-    });
-});
+document.getElementById("searchButton").addEventListener("click", searchDriver);
+
 
 
 createYearlist();
