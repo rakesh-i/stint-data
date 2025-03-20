@@ -645,7 +645,7 @@ function updatePlot() {
     const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
     let config = {
         toImageButtonOptions: {
-          format: 'svg', // one of png, svg, jpeg, webp
+          format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
           height: 1200,
           width: 1920,
