@@ -645,7 +645,7 @@ function updatePlot() {
         toImageButtonOptions: {
           format: 'svg', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 1080,
+          height: 1200,
           width: 1920,
           scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
         }
@@ -662,7 +662,7 @@ function updatePlot() {
         margin: {
             l: 40,
             r: 30,
-            b: 40,
+            b: 65,
             t: 30
         },
         paper_bgcolor: "rgb(255,255,255)",
