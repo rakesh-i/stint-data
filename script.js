@@ -648,7 +648,7 @@ function updatePlot() {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
           height: 1200,
-          width: 1920,
+          width: 1200,
           scale: 1 // Multiply title/legend/axis/canvas sizes by this factor
         }
     };
