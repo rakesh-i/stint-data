@@ -4,6 +4,7 @@ let controller = new AbortController();
 let conList = ['McLaren', 'Mercedes', 'Red Bull Racing', 'Williams', 'Aston Martin', 'Kick Sauber', 'Ferrari',  'Alpine',  'Racing Bulls', 'Haas F1 Team', 'null', null];
 let curYear = 2025;
 
+// Interactions
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
     listYears.forEach(item => item.classList.remove('choose'));
@@ -50,6 +51,7 @@ function selectDriver(event){
     // searchDriver();
 }
 
+// Create lists
 function createDriverList(data){
     const driverList = document.querySelector('#driver-list');
     driverList.innerHTML = '';
@@ -130,6 +132,7 @@ function createYearlist(){
     fetchMeetings(listYears[0].textContent);
 }
 
+// API calls and gathering data
 async function fetchMeetings(year){
     try {
         let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
@@ -232,6 +235,7 @@ async function gatherdata(driver_number, name, team, team_color){
     }
 }
 
+// Displaying data
 function displayTable(stintmap) {
     let l_name = [];
     let t_name = [];
@@ -373,6 +377,150 @@ function displayTable(stintmap) {
 
     updateAverages(l_name, t_name);
     
+}
+
+function updatePlot() {
+    let stintmap = new Map();
+    const table = document.querySelector("table");
+    if (!table) return;
+
+    const rows = table.querySelectorAll("tr");
+    let drivers = [];
+    let stintCounts = []; 
+    let tyres = [];
+    let teamColors = [];
+    let stintLapTimes = [];
+
+    const driverCells = rows[0].querySelectorAll("th");
+    for (let i = 1; i < driverCells.length; i++) {
+        let driver = driverCells[i].textContent.trim();
+        let stintCount = parseInt(driverCells[i].getAttribute("colspan")) || 1;
+        let teamColor = driverCells[i].style.backgroundColor || "#000000"; 
+
+        drivers.push(driver);
+        stintCounts.push(stintCount);
+        teamColors.push(teamColor);
+    }
+
+    const tyreCells = rows[1].querySelectorAll("th");
+    for (let i = 1; i < tyreCells.length; i++) { 
+        tyres.push(tyreCells[i].textContent.trim());
+    }
+
+
+    let driverIndex = 0;
+    let stintIndex = 0;
+    let driverStints = new Map();
+
+    drivers.forEach((driver, i) => {
+        driverStints.set(driver, { laptimes: [], tyres: [], teamColor: teamColors[i] });
+        for (let j = 0; j < stintCounts[i]; j++) {
+            driverStints.get(driver).laptimes.push([]);
+            driverStints.get(driver).tyres.push(tyres[stintIndex]);
+            stintIndex++;
+        }
+    });
+
+    for (let rowIndex = 2; rowIndex < rows.length - 1; rowIndex++) { 
+        const lapCells = rows[rowIndex].querySelectorAll("td");
+        stintIndex = 0;
+        driverIndex = 0;
+
+        for (let i = 0; i < lapCells.length; i++) {
+            let time = lapCells[i].getAttribute("value");
+            let numericTime = time === "NaN" ? NaN : parseFloat(time);
+
+            if (lapCells[i].classList.contains("selected")) {
+                driverStints.get(drivers[driverIndex]).laptimes[stintIndex].push(numericTime);
+            }
+
+            stintIndex++;
+            if (stintIndex >= stintCounts[driverIndex]) {
+                stintIndex = 0;
+                driverIndex++;
+            }
+        }
+    }
+
+    driverStints.forEach((data, driver) => {
+        stintmap.set(driver, {
+            laptimes: data.laptimes,
+            tyres: data.tyres,
+            teamColor: data.teamColor
+        });
+    });
+
+    let traces = [];
+    let traceData = [];
+
+    stintmap.forEach((data, driver) => {
+        let tyreCount = {};
+
+        data.laptimes.forEach((stint, index) => {
+            let filteredLaps = removeOutliers(stint);
+            let median = getMedian(filteredLaps);
+            let tyre = data.tyres[index].slice(0, 3).toUpperCase();
+            let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
+
+            if (!tyreCount[tyre]) {
+                tyreCount[tyre] = 1;
+            } else {
+                tyreCount[tyre]++;
+                tyre += ` (${tyreCount[tyre]})`; 
+            }
+
+            traceData.push({
+                median: median,
+                trace: {
+                    y: filteredLaps,
+                    type: "box",
+                    boxpoints: false,
+                    name: `${lastName}-${tyre}`,
+                    marker: { color: data.teamColor, size: 2 },
+                    jitter: 0.5,
+                    whiskerwidth: 0.2,
+                    line: { width: 1 },
+                    boxpoints: 'suspectedoutliers'
+                }
+            });
+        });
+    });
+
+    traceData.sort((a, b) => a.median - b.median);
+    traces = traceData.map(item => item.trace);
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
+    let config = {
+        toImageButtonOptions: {
+          format: 'png', // one of png, svg, jpeg, webp
+          filename: `plot_${timestamp}`,
+          height: 1200,
+          width: 1200,
+          scale: 1 
+        }
+    };
+
+    let layout = {
+        title: "Lap Times by Driver",
+        yaxis: { 
+            autorange: true, 
+            showgrid: true,
+            gridcolor: 'rgb(255, 255, 255)',
+            gridwidth: 1,
+         },
+        margin: {
+            l: 40,
+            r: 30,
+            b: 65,
+            t: 30
+        },
+        paper_bgcolor: "rgb(255,255,255)",
+        plot_bgcolor: "rgb(243,243,243)",
+        showlegend: false
+    };
+
+    Plotly.newPlot("boxPlot", traces, layout, config);
 }
 
 function convertTime(sss_mmm) {
@@ -548,151 +696,6 @@ function removeCard(dec){
     updateTable();
 }
 
-function updatePlot() {
-    let stintmap = new Map();
-    const table = document.querySelector("table");
-    if (!table) return;
-
-    const rows = table.querySelectorAll("tr");
-    let drivers = [];
-    let stintCounts = []; 
-    let tyres = [];
-    let teamColors = [];
-    let stintLapTimes = [];
-
-    const driverCells = rows[0].querySelectorAll("th");
-    for (let i = 1; i < driverCells.length; i++) {
-        let driver = driverCells[i].textContent.trim();
-        let stintCount = parseInt(driverCells[i].getAttribute("colspan")) || 1;
-        let teamColor = driverCells[i].style.backgroundColor || "#000000"; 
-
-        drivers.push(driver);
-        stintCounts.push(stintCount);
-        teamColors.push(teamColor);
-    }
-
-    const tyreCells = rows[1].querySelectorAll("th");
-    for (let i = 1; i < tyreCells.length; i++) { 
-        tyres.push(tyreCells[i].textContent.trim());
-    }
-
-
-    let driverIndex = 0;
-    let stintIndex = 0;
-    let driverStints = new Map();
-
-    drivers.forEach((driver, i) => {
-        driverStints.set(driver, { laptimes: [], tyres: [], teamColor: teamColors[i] });
-        for (let j = 0; j < stintCounts[i]; j++) {
-            driverStints.get(driver).laptimes.push([]);
-            driverStints.get(driver).tyres.push(tyres[stintIndex]);
-            stintIndex++;
-        }
-    });
-
-    for (let rowIndex = 2; rowIndex < rows.length - 1; rowIndex++) { 
-        const lapCells = rows[rowIndex].querySelectorAll("td");
-        stintIndex = 0;
-        driverIndex = 0;
-
-        for (let i = 0; i < lapCells.length; i++) {
-            let time = lapCells[i].getAttribute("value");
-            let numericTime = time === "NaN" ? NaN : parseFloat(time);
-
-            if (lapCells[i].classList.contains("selected")) {
-                driverStints.get(drivers[driverIndex]).laptimes[stintIndex].push(numericTime);
-            }
-
-            stintIndex++;
-            if (stintIndex >= stintCounts[driverIndex]) {
-                stintIndex = 0;
-                driverIndex++;
-            }
-        }
-    }
-
-    driverStints.forEach((data, driver) => {
-        stintmap.set(driver, {
-            laptimes: data.laptimes,
-            tyres: data.tyres,
-            teamColor: data.teamColor
-        });
-    });
-
-    let traces = [];
-    let traceData = [];
-
-    stintmap.forEach((data, driver) => {
-        let tyreCount = {};
-
-        data.laptimes.forEach((stint, index) => {
-            let filteredLaps = removeOutliers(stint);
-            let median = getMedian(filteredLaps);
-            let tyre = data.tyres[index].slice(0, 3).toUpperCase();
-            let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
-
-            if (!tyreCount[tyre]) {
-                tyreCount[tyre] = 1;
-            } else {
-                tyreCount[tyre]++;
-                tyre += ` (${tyreCount[tyre]})`; 
-            }
-
-            traceData.push({
-                median: median,
-                trace: {
-                    y: filteredLaps,
-                    type: "box",
-                    boxpoints: false,
-                    name: `${lastName}-${tyre}`,
-                    marker: { color: data.teamColor, size: 2 },
-                    jitter: 0.5,
-                    whiskerwidth: 0.2,
-                    line: { width: 1 },
-                    boxpoints: 'suspectedoutliers'
-                }
-            });
-        });
-    });
-
-    traceData.sort((a, b) => a.median - b.median);
-    traces = traceData.map(item => item.trace);
-
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
-    let config = {
-        toImageButtonOptions: {
-          format: 'png', // one of png, svg, jpeg, webp
-          filename: `plot_${timestamp}`,
-          height: 1200,
-          width: 1200,
-          scale: 1 
-        }
-    };
-
-    let layout = {
-        title: "Lap Times by Driver",
-        yaxis: { 
-            autorange: true, 
-            showgrid: true,
-            gridcolor: 'rgb(255, 255, 255)',
-            gridwidth: 1,
-         },
-        margin: {
-            l: 40,
-            r: 30,
-            b: 65,
-            t: 30
-        },
-        paper_bgcolor: "rgb(255,255,255)",
-        plot_bgcolor: "rgb(243,243,243)",
-        showlegend: false
-    };
-
-    Plotly.newPlot("boxPlot", traces, layout, config);
-}
-
-
 function updateTable(){
     let stintmap = new Map();
     for (let [driver, data] of driverMap) {
@@ -740,7 +743,7 @@ function removeOutliers(data, threshold = 1.1) {
     return sorted;
 }
 
-
+// Buttons
 document.getElementById('screenshot-btn').addEventListener('click', function() {
     let tableContainer = document.getElementById('table-container');
     
