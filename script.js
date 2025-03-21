@@ -211,13 +211,13 @@ async function gatherdata(driver_number, name, team, team_color){
         }
         
         const sessionType = document.querySelector(".session-container .choose")?.textContent || "";
-        if (sessionType.toLowerCase().includes("sprint") || sessionType.toLowerCase().includes("race")) {
+        if (sessionType.toLowerCase() == "sprint" || sessionType.toLowerCase().includes("race")) {
             let allLaps = [];
             for (let i = 0; i < stint.length; i++) {
                 allLaps = allLaps.concat(stint[i]); 
             }
             stint.push(allLaps);
-            stinttyre.push("WHOLE RACE"); 
+            stinttyre.push("ALL"); 
         }
 
         driverMap.set(`${name}`, {
@@ -475,7 +475,6 @@ function generateStintSelection() {
             return 0;
         });
     }
-    // console.log(array);
     
     driverMap = new Map(array);
 
@@ -495,6 +494,7 @@ function generateStintSelection() {
 
         driverDiv.appendChild(del);
         driverDiv.appendChild(driverLabel);
+        const sessionType = document.querySelector(".session-container .choose")?.textContent || "";
         
         for (let i = 0; i < data.laptimes.length; i++) {
             const holder = document.createElement('div');
@@ -503,13 +503,25 @@ function generateStintSelection() {
             checkbox.type = 'checkbox';
             checkbox.id = `stint-${driver}-${i}`;
             checkbox.value = i;
-            checkbox.checked = true; 
             
             const label = document.createElement('label');
             const stintLapCount = data.laptimes[i].length;
             label.htmlFor = `stint-${driver}-${i}`;
             const tyreType = data.tyres[i];
             label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
+
+            
+            if (sessionType.toLowerCase() == "sprint" || sessionType.toLowerCase().includes("race") ) {
+                if(label.textContent.toLocaleLowerCase().includes("all")){
+                    checkbox.checked = true; 
+                }
+                else{
+                    checkbox.checked = false; 
+                }
+            }
+            else{
+                checkbox.checked = true; 
+            }
             
             holder.appendChild(checkbox);
             holder.appendChild(label);
