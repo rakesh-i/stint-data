@@ -452,6 +452,7 @@ function updatePlot() {
 
     let traces = [];
     let traceData = [];
+    let orderby = document.getElementById('toggleLabel').textContent;
 
     stintmap.forEach((data, driver) => {
         let tyreCount = {};
@@ -459,6 +460,7 @@ function updatePlot() {
         data.laptimes.forEach((stint, index) => {
             let filteredLaps = removeOutliers(stint);
             let median = getMedian(filteredLaps);
+            let mean = getMean(filteredLaps);
             let tyre = data.tyres[index].slice(0, 3).toUpperCase();
             let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
 
@@ -471,6 +473,7 @@ function updatePlot() {
 
             traceData.push({
                 median: median,
+                mean: mean, 
                 trace: {
                     y: filteredLaps,
                     type: "box",
@@ -480,13 +483,19 @@ function updatePlot() {
                     jitter: 0.5,
                     whiskerwidth: 0.2,
                     line: { width: 1 },
-                    boxpoints: 'suspectedoutliers'
+                    boxpoints: 'suspectedoutliers',
+                    boxmean:(orderby=='Mean')?true:false
                 }
             });
         });
     });
-
-    traceData.sort((a, b) => a.median - b.median);
+    if(orderby=='Mean'){
+        traceData.sort((a, b) => a.mean - b.mean);
+    }
+    else{
+        traceData.sort((a, b) => a.median - b.median);
+    }
+    
     traces = traceData.map(item => item.trace);
 
     const now = new Date();
@@ -502,7 +511,9 @@ function updatePlot() {
     };
 
     let layout = {
-        title: "Lap Times by Driver",
+        title :{
+            text: `Lap Times Sorted by ${orderby}`
+        },
         yaxis: { 
             autorange: true, 
             showgrid: true,
@@ -513,9 +524,9 @@ function updatePlot() {
             l: 40,
             r: 30,
             b: 65,
-            t: 30
+            t: 65
         },
-        paper_bgcolor: "rgb(255,255,255)",
+        paper_bgcolor: "rgb(243,243,243)",
         plot_bgcolor: "rgb(243,243,243)",
         showlegend: false
     };
@@ -732,6 +743,15 @@ function getMedian(arr) {
     return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
+function getMean(arr){
+    let sorted = [...arr].filter(v => v !== 'NaN' && !isNaN(v)).map(v => parseFloat(v)).sort((a, b) => a - b);
+    let sum = 0;
+    for(let i=0; i<sorted.length; i++){
+        sum+=sorted[i];
+    }
+    return sum/sorted.length;
+}
+
 function removeOutliers(data, threshold = 1.1) {
     let cleanedData = data
         .filter(val => val !== 'NaN' && !isNaN(val)) 
@@ -772,6 +792,30 @@ document.getElementById('selectall').addEventListener('click', function(){
         this.textContent = 'UNSELECT ALL';
         searchDriver();
     }
+});
+
+let isMedianSort = true; // Default OFF state
+// document.getElementById('toggleButton').addEventListener('change', function(){
+//     const toggleSwitch = document.getElementById("toggleSwitch");
+//     const toggleLabel = document.getElementById("toggleLabel");
+//     isMedianSort = !isMedianSort;
+//     toggleButton.textContent = isMedianSort ? "ON" : "OFF";
+//     toggleButton.classList.toggle("on", isMedianSort);
+//     toggleButton.classList.toggle("off", !isMedianSort);
+    
+// });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const toggleSwitch = document.getElementById("toggleSwitch");
+    const toggleLabel = document.getElementById("toggleLabel");
+    // let isMedianSort = true; // Default to Median
+
+    toggleSwitch.addEventListener("change", function () {
+        isMedianSort = !isMedianSort;
+        toggleLabel.textContent = isMedianSort ? "Median" : "Mean";
+
+        updatePlot();
+    });
 });
 
 document.getElementById("searchButton").addEventListener("click", searchDriver);
