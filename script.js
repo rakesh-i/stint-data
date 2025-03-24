@@ -549,11 +549,17 @@ function updatePlot() {
                 color: traceData.map(item=>item.trace.marker.color),
             },
             type: 'bar',
-            textposition: "inside",
-            insidetextfont:{
+            textposition: "outside",
+            // insidetextfont:{
+            //     size: 16,
+            //     weight: 700
+            // },
+            textfont : {
+                // lineposition: "under+over",
                 size: 16,
                 weight: 700
-            }
+            },
+            textangle: "-90"
         }
     ];
 
