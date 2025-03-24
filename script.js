@@ -187,7 +187,7 @@ async function gatherdata(driver_number, name, team, team_color){
         const data1 = await response.json();
         response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`, { signal: controller.signal });
         const data2 = await response.json();
-
+        // console.log(data1);
         if(!data1||!data2){
             throw new Error('Missing data for driver', driver_number);
         }
@@ -202,13 +202,13 @@ async function gatherdata(driver_number, name, team, team_color){
             for (let j = start; j <= end; j++) {
                 let x = data1[j-1];
                 if(x==undefined){
-                    stint[i].push('NaN');
+                    stint[i].push(['NaN', 'NaN']);
                 }
                 else if(x.lap_duration===null){
-                    stint[i].push('NaN');
+                    stint[i].push(['NaN', x.lap_number]);
                 }
                 else{
-                    stint[i].push(x.lap_duration.toFixed(3));
+                    stint[i].push([x.lap_duration.toFixed(3), x.lap_number]);
                 }         
             }
         }
@@ -230,6 +230,7 @@ async function gatherdata(driver_number, name, team, team_color){
             team_name: team,
             team_color: team_color
         });
+        
     } catch (error) {
         console.log(error);
     }
@@ -314,8 +315,11 @@ function displayTable(stintmap) {
         if (j === 0) {
             table += '<th rowspan="' + maxLaps + '">Laps</th>';
         }
+        // console.log(l_name);
         for (let i = 0; i < l_name.length; i++) {
-            let timeFormated = convertTime(l_name[i][j]);
+            // console.log(l_name[i][j]);
+            let timeFormated = l_name[i][j]!==undefined?convertTime(l_name[i][j][0]):'';
+            
             if(i==0){
                 if(stintnum.has(i)){
                     table += `<td class="lap selected border-left border-right" data-stint="${i}" data-lap="${j}" value="${l_name[i][j] || ''}">${timeFormated || ''}</td>`;
@@ -428,13 +432,13 @@ function updatePlot() {
         const lapCells = rows[rowIndex].querySelectorAll("td");
         stintIndex = 0;
         driverIndex = 0;
-
         for (let i = 0; i < lapCells.length; i++) {
-            let time = lapCells[i].getAttribute("value");
-            let numericTime = time === "NaN" ? NaN : parseFloat(time);
+            let time = lapCells[i].getAttribute("value").split(",");
+            let lapNumber = time[1] === "NaN" ? NaN : parseFloat(time[1]);
+            let numericTime = time[0] === "NaN" ? NaN : parseFloat(time[0]);
 
             if (lapCells[i].classList.contains("selected")) {
-                driverStints.get(drivers[driverIndex]).laptimes[stintIndex].push(numericTime);
+                driverStints.get(drivers[driverIndex]).laptimes[stintIndex].push([numericTime, lapNumber]);
             }
 
             stintIndex++;
@@ -444,6 +448,7 @@ function updatePlot() {
             }
         }
     }
+    // console.log(driverStints);
 
     driverStints.forEach((data, driver) => {
         stintmap.set(driver, {
@@ -462,8 +467,9 @@ function updatePlot() {
 
         data.laptimes.forEach((stint, index) => {
             let filteredLaps = removeOutliers(stint);
-            let median = getMedian(filteredLaps);
-            let mean = getMean(filteredLaps);
+            let y = filteredLaps.map(item=>item[0]);
+            let median = getMedian(y);
+            let mean = getMean(y);
             let tyre = data.tyres[index].slice(0, 3).toUpperCase();
             let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
 
@@ -478,7 +484,7 @@ function updatePlot() {
                 median: median,
                 mean: mean, 
                 trace: {
-                    y: filteredLaps,
+                    y: y,
                     type: "box",
                     boxpoints: false,
                     name: `${lastName}-${tyre}`,
@@ -500,7 +506,6 @@ function updatePlot() {
     }
     
     traces = traceData.map(item => item.trace);
-
     const now = new Date();
     const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
     let config = {
@@ -540,20 +545,23 @@ function updatePlot() {
     let first = (orderby=="Mean")?traceData[0].mean:traceData[0].median;
     // let a = (orderby=="Mean")?traceData.map(item=>item.mean-first);
     // console.log(traceData[0].trace.marker.color);
+    // console.log(traceData);
     let bar = [
         {
             y: (orderby=="Mean")?traceData.map(item=>item.mean/first*100-100):traceData.map(item=>item.median/first*100-100),
+
             x: traceData.map(item=>item.trace.name),
             text: (orderby=="Mean")?traceData.map(item=>(item.mean/first*100-100).toFixed(3)+"%"):traceData.map(item=>(item.median/first*100-100).toFixed(3)+"%"),
             marker:{
                 color: traceData.map(item=>item.trace.marker.color),
             },
             type: 'bar',
-            textposition: "inside",
-            insidetextfont:{
+            textposition: "outside",
+            textfont : {
                 size: 16,
                 weight: 700
-            }
+            },
+            textangle: "-90"
         }
     ];
 
@@ -581,9 +589,75 @@ function updatePlot() {
         }
     };
 
+    // Line chart
+    let layout3 = {
+        title :{
+            text: `Race Progression`
+        },
+        yaxis: { 
+            autorange: true, 
+            showgrid: true,
+            gridcolor: 'rgb(50, 50, 50)',
+            gridwidth: 1,
+         },
+        margin: {
+            l: 40,
+            r: 30,
+            b: 65,
+            t: 65
+        },
+        paper_bgcolor: "rgb(0,0,0)",
+        plot_bgcolor: "rgb(0,0,0)",
+        font: {
+            color: '#ffffff'
+        },
+        modebar: {
+            remove: 'lasso2d'
+        }
+    };
+    // console.log(stintmap);
+    let linetraces = [];
+    let colorCount = {};
+    stintmap.forEach((data, driver) => {
+        let tyreCount = {};
+        let color = data.teamColor;
+        if (!colorCount[color]) {
+            colorCount[color] = 1;
+        } else {
+            colorCount[color]++; 
+        }
+        data.laptimes.forEach((stint, index) => {
+            let filteredLaps = removeOutliers(stint);
+            let y = filteredLaps.map(item=>item[0]);
+            let x = filteredLaps.map(item=>item[1]);
+            let tyre = data.tyres[index].slice(0, 3).toUpperCase();
+            let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
+
+            if (!tyreCount[tyre]) {
+                tyreCount[tyre] = 1;
+            } else {
+                tyreCount[tyre]++;
+                tyre += ` (${tyreCount[tyre]})`; 
+            }
+
+            linetraces.push ({
+                y: y,
+                x: x,
+                type: "scatter",
+                name: `${lastName}`,
+                marker: { color: data.teamColor, size: 2 },
+                line: { 
+                    dash: (colorCount[data.teamColor]===1)?'solid':'dot',
+                    width: 2 
+                },
+            });
+        });
+    });
+
 
     Plotly.newPlot("boxPlot", traces, layout1, config);
     Plotly.newPlot("barPlot", bar, layout2, config);
+    Plotly.newPlot("linePlot", linetraces, layout3);
 
 }
 
@@ -794,7 +868,7 @@ function updateTable(){
         }
         
     }
-
+    // console.log(stintmap);
     displayTable(stintmap);
     updatePlot();
 }
@@ -814,15 +888,22 @@ function getMean(arr){
     return sum/sorted.length;
 }
 
-function removeOutliers(data, threshold = 1.1) {
-    let cleanedData = data
-        .filter(val => val !== 'NaN' && !isNaN(val)) 
-        .map(val => parseFloat(val)); 
+// function removeOutliers(data) {
+//     let cleanedData = data
+//         .filter(val => val[0] !== 'NaN' && !isNaN(val[0])) 
+//         .map(val => parseFloat(val)); 
 
-    if (cleanedData.length < 4) return cleanedData; 
 
-    let sorted = cleanedData.sort((a, b) => a - b);
-    return sorted;
+//     // let sorted = cleanedData.sort((a, b) => a - b);
+//     return cleanedData;
+// }
+
+function removeOutliers(data) {
+    let cleanedData = data.filter(val => val[0] !== 'NaN' && !isNaN(val[0])).map(val => [parseFloat(val[0]), parseInt(val[1])]); 
+
+
+    // let sorted = cleanedData.sort((a, b) => a - b);
+    return cleanedData;
 }
 
 // Buttons
