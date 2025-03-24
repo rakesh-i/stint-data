@@ -264,10 +264,11 @@ function displayTable(stintmap) {
     // console.log(driverMap);
 
     const container = document.getElementById('table-container');
-    const box = document.getElementById('boxPlot');
+    const chart = document.getElementById('charts');
+    chart.style.display = "block";
     if(l_name.length==0){
         container.innerHTML = '';
-        box.innerHTML = '';
+        chart.style.display = 'none'
         return;
     }
     let table = '<table border="1">';
@@ -504,20 +505,19 @@ function updatePlot() {
         toImageButtonOptions: {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 1200,
-          width: 1200,
-          scale: 1 
+          height: 1440,
+          width: 1440,
         }
     };
 
-    let layout = {
+    let layout1 = {
         title :{
-            text: `Lap Times Sorted by ${orderby}`
+            text: `Race Pace Sorted by ${orderby}`
         },
         yaxis: { 
             autorange: true, 
             showgrid: true,
-            gridcolor: 'rgb(255, 255, 255)',
+            gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
          },
         margin: {
@@ -526,12 +526,63 @@ function updatePlot() {
             b: 65,
             t: 65
         },
-        paper_bgcolor: "rgb(243,243,243)",
-        plot_bgcolor: "rgb(243,243,243)",
-        showlegend: false
+        paper_bgcolor: "rgb(0,0,0)",
+        plot_bgcolor: "rgb(0,0,0)",
+        showlegend: false,
+        font: {
+            color: '#ffffff'
+        }
     };
 
-    Plotly.newPlot("boxPlot", traces, layout, config);
+    // bar graph
+    let first = (orderby=="Mean")?traceData[0].mean:traceData[0].median;
+    // let a = (orderby=="Mean")?traceData.map(item=>item.mean-first);
+    // console.log(traceData[0].trace.marker.color);
+    let bar = [
+        {
+            y: (orderby=="Mean")?traceData.map(item=>item.mean/first*100-100):traceData.map(item=>item.median/first*100-100),
+            x: traceData.map(item=>item.trace.name),
+            text: (orderby=="Mean")?traceData.map(item=>(item.mean/first*100-100).toFixed(3)+"%"):traceData.map(item=>(item.median/first*100-100).toFixed(3)+"%"),
+            marker:{
+                color: traceData.map(item=>item.trace.marker.color),
+            },
+            type: 'bar',
+            textposition: "inside",
+            insidetextfont:{
+                size: 16,
+                weight: 700
+            }
+        }
+    ];
+
+    let layout2 = {
+        title :{
+            text: `Deficit to the leader Sorted by ${orderby}`
+        },
+        yaxis: { 
+            autorange: true, 
+            showgrid: true,
+            gridcolor: 'rgb(50, 50, 50)',
+            gridwidth: 1,
+         },
+        margin: {
+            l: 40,
+            r: 30,
+            b: 65,
+            t: 65
+        },
+        paper_bgcolor: "rgb(0,0,0)",
+        plot_bgcolor: "rgb(0,0,0)",
+        showlegend: false,
+        font: {
+            color: '#ffffff'
+        }
+    };
+
+
+    Plotly.newPlot("boxPlot", traces, layout1, config);
+    Plotly.newPlot("barPlot", bar, layout2, config);
+
 }
 
 function convertTime(sss_mmm) {
@@ -591,8 +642,8 @@ async function searchDriver(){
         document.getElementById('loading-screen').style.display = 'flex';
         const container = document.getElementById('table-container');
         container.innerHTML = '';
-        const box = document.getElementById('boxPlot');
-        box.innerHTML = '';
+        const chart = document.getElementById('charts');
+        chart.style.display = "none";
         driverMap.clear();
         const selectedDriver = document.querySelectorAll('#driver-list .choose');
         if(selectedDriver.length!=0){
@@ -795,15 +846,6 @@ document.getElementById('selectall').addEventListener('click', function(){
 });
 
 let isMedianSort = true; // Default OFF state
-// document.getElementById('toggleButton').addEventListener('change', function(){
-//     const toggleSwitch = document.getElementById("toggleSwitch");
-//     const toggleLabel = document.getElementById("toggleLabel");
-//     isMedianSort = !isMedianSort;
-//     toggleButton.textContent = isMedianSort ? "ON" : "OFF";
-//     toggleButton.classList.toggle("on", isMedianSort);
-//     toggleButton.classList.toggle("off", !isMedianSort);
-    
-// });
 
 document.addEventListener("DOMContentLoaded", function () {
     const toggleSwitch = document.getElementById("toggleSwitch");

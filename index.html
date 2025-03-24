@@ -58,24 +58,31 @@
     <div id="loading-screen" style="display: none;">
         <div class="spinner"></div>
     </div>
-    
-    <label class="switch">
-        <input type="checkbox" id="toggleSwitch">
-        <span class="slider"></span>
-    </label>
-    <span id="toggleLabel">Median</span>
-    
-    <div id="boxPlot" style="width: 95%;">
-    </div>
-    
+
     <div class="table">
         <div id="table-container"></div>
+        
     </div>
 
     <div class="export">
         <button onclick="exportToExcel()">Export to Excel</button>
         <button id="screenshot-btn">Take Screenshot</button>
     </div>
+
+    <label class="switch">
+        <input type="checkbox" id="toggleSwitch">
+        <span class="slider"></span>
+    </label>
+    <span id="toggleLabel">Median</span>
+    
+    <div id="charts" style="width: 95%;">
+        <div id="boxPlot" style="width: 100%;">
+        </div>
+        <div id="divider"></div>
+        <div id="barPlot" style="width: 100%;">
+        </div>
+    </div>
+    
 
     <footer>
         <div class="footer-content">
@@ -98,6 +105,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>
-    <script src="https://cdn.plot.ly/plotly-3.0.0.min.js" charset="utf-8"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
 </body>
 </html>
