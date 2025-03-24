@@ -53,7 +53,7 @@
 
     <div id="driver-stints-form"></div>
     
-    <button id="update" onclick="updateTable()">UPDATE TABLE</button>
+    <button id="update" style="display: none;" onclick="updateTable()">UPDATE TABLE</button>
 
     <div id="loading-screen" style="display: none;">
         <div class="spinner"></div>
@@ -64,18 +64,24 @@
         
     </div>
 
-    <div class="export">
+    <div id="export" style="display: none;">
         <button onclick="exportToExcel()">Export to Excel</button>
         <button id="screenshot-btn">Take Screenshot</button>
     </div>
 
-    <label class="switch">
-        <input type="checkbox" id="toggleSwitch">
-        <span class="slider"></span>
-    </label>
-    <span id="toggleLabel">Median</span>
     
-    <div id="charts" style="width: 95%;">
+    
+    
+    <div id="charts" style="width: 95%; display: none;">
+        <div id="divider" style="width: 100%;"></div>
+        <div id="median">
+            <label class="switch">
+                <input type="checkbox" id="toggleSwitch">
+                <span class="slider"></span>
+            </label>
+            <span id="toggleLabel">Median</span>
+        </div>
+        
         <div id="boxPlot" style="width: 100%;">
         </div>
         <div id="divider"></div>

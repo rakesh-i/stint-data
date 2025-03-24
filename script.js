@@ -262,13 +262,15 @@ function displayTable(stintmap) {
     // console.log(l_name, t_name, d_name);
     
     // console.log(driverMap);
-
+    const exportdiv = document.getElementById('export');
     const container = document.getElementById('table-container');
     const chart = document.getElementById('charts');
     chart.style.display = "block";
+    exportdiv.style.display = 'block';
     if(l_name.length==0){
         container.innerHTML = '';
-        chart.style.display = 'none'
+        chart.style.display = 'none';
+        exportdiv.style.display = 'none';
         return;
     }
     let table = '<table border="1">';
@@ -644,6 +646,8 @@ async function searchDriver(){
         container.innerHTML = '';
         const chart = document.getElementById('charts');
         chart.style.display = "none";
+        const exportdiv = document.getElementById('export');
+        exportdiv.style.display = 'none';
         driverMap.clear();
         const selectedDriver = document.querySelectorAll('#driver-list .choose');
         if(selectedDriver.length!=0){
@@ -671,7 +675,8 @@ function generateStintSelection() {
     const formContainer = document.getElementById('driver-stints-form');
     formContainer.innerHTML = '';
     document.getElementById('loading-screen').style.display = 'none';
-
+    const updatebutton = document.getElementById('update');
+    updatebutton.style.display = 'block';
     let array = [...driverMap];
     if(curYear==2025){
         array.sort((a, b)=>{
@@ -687,69 +692,75 @@ function generateStintSelection() {
     }
     
     driverMap = new Map(array);
-
-    for (let [driver, data] of driverMap) {
-        const driverDiv = document.createElement('div');
-        driverDiv.className = 'driver-div';
-        driverDiv.dataset.driverno = data.num;
-
-        const driverLabel = document.createElement('div');
-        driverLabel.textContent = `${driver}`;
-        driverLabel.className = 'drivername'
-
-        const del = document.createElement('button');
-        del.textContent = 'REMOVE';
-        del.className = 'del-button'
-        del.value = data.num;
-
-        driverDiv.appendChild(del);
-        driverDiv.appendChild(driverLabel);
-        const sessionType = document.querySelector(".session-container .choose")?.textContent || "";
-        
-        for (let i = 0; i < data.laptimes.length; i++) {
-            const holder = document.createElement('div');
-            holder.className = 'holder';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `stint-${driver}-${i}`;
-            checkbox.value = i;
+    if(array.length==0){
+        updatebutton.style.display = 'none';
+    }
+    else{
+        for (let [driver, data] of driverMap) {
+            const driverDiv = document.createElement('div');
+            driverDiv.className = 'driver-div';
+            driverDiv.dataset.driverno = data.num;
+    
+            const driverLabel = document.createElement('div');
+            driverLabel.textContent = `${driver}`;
+            driverLabel.className = 'drivername'
+    
+            const del = document.createElement('button');
+            del.textContent = 'REMOVE';
+            del.className = 'del-button'
+            del.value = data.num;
+    
+            driverDiv.appendChild(del);
+            driverDiv.appendChild(driverLabel);
+            const sessionType = document.querySelector(".session-container .choose")?.textContent || "";
             
-            const label = document.createElement('label');
-            const stintLapCount = data.laptimes[i].length;
-            label.htmlFor = `stint-${driver}-${i}`;
-            const tyreType = data.tyres[i];
-            label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
-
-            
-            if (sessionType.toLowerCase() == "sprint" || sessionType.toLowerCase().includes("race") ) {
-                if(label.textContent.toLocaleLowerCase().includes("all")){
-                    checkbox.checked = true; 
+            for (let i = 0; i < data.laptimes.length; i++) {
+                const holder = document.createElement('div');
+                holder.className = 'holder';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `stint-${driver}-${i}`;
+                checkbox.value = i;
+                
+                const label = document.createElement('label');
+                const stintLapCount = data.laptimes[i].length;
+                label.htmlFor = `stint-${driver}-${i}`;
+                const tyreType = data.tyres[i];
+                label.textContent = ` ${tyreType} (${stintLapCount} laps)`;
+    
+                
+                if (sessionType.toLowerCase() == "sprint" || sessionType.toLowerCase().includes("race") ) {
+                    if(label.textContent.toLocaleLowerCase().includes("all")){
+                        checkbox.checked = true; 
+                    }
+                    else{
+                        checkbox.checked = false; 
+                    }
                 }
                 else{
-                    checkbox.checked = false; 
+                    checkbox.checked = true; 
                 }
+                
+                holder.appendChild(checkbox);
+                holder.appendChild(label);
+                driverDiv.appendChild(holder);
             }
-            else{
-                checkbox.checked = true; 
-            }
-            
-            holder.appendChild(checkbox);
-            holder.appendChild(label);
-            driverDiv.appendChild(holder);
+    
+            del.addEventListener('click', (event)=>{
+                const ul = document.getElementById('driver-list');
+                const list = ul.getElementsByTagName('li');
+                for(let li of list){
+                    if(li.getAttribute('value')===event.target.value){
+                        li.classList.remove('choose');
+                        removeCard(parseInt(event.target.value));
+                    }
+                }
+            });
+            formContainer.appendChild(driverDiv);
         }
-
-        del.addEventListener('click', (event)=>{
-            const ul = document.getElementById('driver-list');
-            const list = ul.getElementsByTagName('li');
-            for(let li of list){
-                if(li.getAttribute('value')===event.target.value){
-                    li.classList.remove('choose');
-                    removeCard(parseInt(event.target.value));
-                }
-            }
-        });
-        formContainer.appendChild(driverDiv);
     }
+
+    
 }
 
 function removeCard(dec){    
