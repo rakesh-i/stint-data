@@ -217,7 +217,7 @@ button{
 
 /* ON state (checked) */
 input:checked + .slider {
-    background-color: #4CAF50;
+    background-color: #af4caf;
 }
 
 input:checked + .slider:before {
@@ -271,7 +271,7 @@ th, td {
     gap:5px;
 }
 
-.export{
+#export{
     display: flex;
     gap: 10px;
 }
@@ -285,22 +285,31 @@ th, td {
     border-radius: 6px;
 }
 
-.export>button:nth-child(1){
+#export>button:nth-child(1){
     color: white;
-    font-size: 20px;
-    padding: 10px;
+    font-size: 16px;
+    padding: 5px;
     border: none;
     background-color:#00ac47;
     border-radius: 5px;
 }
 
-.export>button:nth-child(2){
+#export>button:nth-child(2){
     color: white;
-    font-size: 20px;
-    padding: 10px;
+    font-size: 16px;
+    padding: 5px;
     border: none;
     background-color:#15151e;
     border-radius: 5px;
+}
+
+#median{
+    font-family: 'f1regular';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 5px;
 }
 
 .footer-content{
