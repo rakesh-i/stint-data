@@ -547,8 +547,7 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         showlegend: false,
         font: {
-            color: '#ffffff',
-            size: 16
+            color: '#ffffff', 
         },
         modebar: {
             remove: 'lasso2dp',
@@ -605,7 +604,6 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
-            size: 16
         },
         modebar: {
             remove: 'lasso',
@@ -640,7 +638,6 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         font: {
             color: '#ffffff',
-            size: 16
         },
         modebar: {
             remove: 'lasso2dp',
