@@ -508,13 +508,15 @@ function updatePlot() {
     
     traces = traceData.map(item => item.trace);
     const now = new Date();
-    const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(0, 14);
+    const timestamp = now.toISOString().replace(/[-T:.Z]/g, "").slice(3, 14);
     let config = {
+        responsive: true,
         toImageButtonOptions: {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 1440,
+          height: 875,
           width: 1440,
+          scale:1
         }
     };
 
@@ -522,28 +524,37 @@ function updatePlot() {
         title :{
             text: `Race Pace Sorted by ${orderby}`
         },
+        xaxis:{
+            tickangle: 90,
+        },
         yaxis: { 
+            title:{
+                text : "LAP TIME"
+            },
             autorange: true, 
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
+            
          },
         margin: {
-            l: 40,
+            l: 50,
             r: 30,
-            b: 65,
-            t: 65
+            // b: 65,
+            // t: 65
         },
         paper_bgcolor: "rgb(0,0,0)",
         plot_bgcolor: "rgb(0,0,0)",
         showlegend: false,
         font: {
-            color: '#ffffff'
+            color: '#ffffff',
+            size: 16
         },
         modebar: {
             remove: 'lasso2dp',
             orientation: 'v'
         },
+        
     };
 
     // bar graph
@@ -563,7 +574,7 @@ function updatePlot() {
                 size: 16,
                 weight: 700
             },
-            textangle: "-90"
+            // textangle: "-90"
         }
     ];
 
@@ -571,23 +582,30 @@ function updatePlot() {
         title :{
             text: `Deficit to the leader Sorted by ${orderby}`
         },
+        xaxis:{
+            tickangle: 90,
+        },
         yaxis: { 
+            title:{
+                text : "SLOWER ===>"
+            },
             autorange: true, 
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
          },
         margin: {
-            l: 40,
+            l: 50,
             r: 30,
-            b: 65,
-            t: 65
+            // b: 65,
+            // t: 65
         },
         paper_bgcolor: "rgb(0,0,0)",
         plot_bgcolor: "rgb(0,0,0)",
         showlegend: false,
         font: {
-            color: '#ffffff'
+            color: '#ffffff',
+            size: 16
         },
         modebar: {
             remove: 'lasso',
@@ -600,22 +618,29 @@ function updatePlot() {
         title :{
             text: `Race Progression`
         },
+        xaxis:{
+            tickangle: 90,
+        },
         yaxis: { 
+            title:{
+                text : "LAP TIME"
+            },
             autorange: true, 
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
          },
         margin: {
-            l: 40,
+            l: 50,
             r: 30,
-            b: 65,
-            t: 65
+            // b: 65,
+            // t: 65
         },
         paper_bgcolor: "rgb(0,0,0)",
         plot_bgcolor: "rgb(0,0,0)",
         font: {
-            color: '#ffffff'
+            color: '#ffffff',
+            size: 16
         },
         modebar: {
             remove: 'lasso2dp',
@@ -623,7 +648,7 @@ function updatePlot() {
         },
         legend: {"orientation": "h"}
     };
-    // console.log(stintmap);
+
     let linetraces = [];
     let colorCount = {};
     stintmap.forEach((data, driver) => {
