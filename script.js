@@ -663,9 +663,9 @@ function updatePlot() {
     });
 
 
-    Plotly.newPlot("boxPlot", traces, layout1, {displaylogo: false}, config);
-    Plotly.newPlot("barPlot", bar, layout2, {displaylogo: false}, config);
-    Plotly.newPlot("linePlot", linetraces, layout3, {displaylogo: false}, config);
+    Plotly.newPlot("boxPlot", traces, layout1, config);
+    Plotly.newPlot("barPlot", bar, layout2, config);
+    Plotly.newPlot("linePlot", linetraces, layout3, config);
 
 }
 
