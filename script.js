@@ -448,7 +448,6 @@ function updatePlot() {
             }
         }
     }
-    // console.log(driverStints);
 
     driverStints.forEach((data, driver) => {
         stintmap.set(driver, {
@@ -479,23 +478,25 @@ function updatePlot() {
                 tyreCount[tyre]++;
                 tyre += ` (${tyreCount[tyre]})`; 
             }
-
-            traceData.push({
-                median: median,
-                mean: mean, 
-                trace: {
-                    y: y,
-                    type: "box",
-                    boxpoints: false,
-                    name: `${lastName}-${tyre}`,
-                    marker: { color: data.teamColor, size: 2 },
-                    jitter: 0.5,
-                    whiskerwidth: 0.2,
-                    line: { width: 1 },
-                    boxpoints: 'suspectedoutliers',
-                    boxmean:(orderby=='Mean')?true:false
-                }
-            });
+            if(mean!=-1&&median!==-1){
+                traceData.push({
+                    median: median,
+                    mean: mean, 
+                    trace: {
+                        y: y,
+                        type: "box",
+                        boxpoints: false,
+                        name: `${lastName}-${tyre}`,
+                        marker: { color: data.teamColor, size: 2 },
+                        jitter: 0.5,
+                        whiskerwidth: 0.2,
+                        line: { width: 1 },
+                        boxpoints: 'suspectedoutliers',
+                        boxmean:(orderby=='Mean')?true:false
+                    }
+                });
+            }
+            
         });
     });
     if(orderby=='Mean'){
@@ -538,14 +539,15 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff'
-        }
+        },
+        modebar: {
+            remove: 'lasso2dp',
+            orientation: 'v'
+        },
     };
 
     // bar graph
     let first = (orderby=="Mean")?traceData[0].mean:traceData[0].median;
-    // let a = (orderby=="Mean")?traceData.map(item=>item.mean-first);
-    // console.log(traceData[0].trace.marker.color);
-    // console.log(traceData);
     let bar = [
         {
             y: (orderby=="Mean")?traceData.map(item=>item.mean/first*100-100):traceData.map(item=>item.median/first*100-100),
@@ -586,7 +588,11 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff'
-        }
+        },
+        modebar: {
+            remove: 'lasso',
+            orientation: 'v'
+        },
     };
 
     // Line chart
@@ -612,8 +618,10 @@ function updatePlot() {
             color: '#ffffff'
         },
         modebar: {
-            remove: 'lasso2d'
-        }
+            remove: 'lasso2dp',
+            orientation: 'v'
+        },
+        legend: {"orientation": "h"}
     };
     // console.log(stintmap);
     let linetraces = [];
@@ -655,9 +663,9 @@ function updatePlot() {
     });
 
 
-    Plotly.newPlot("boxPlot", traces, layout1, config);
-    Plotly.newPlot("barPlot", bar, layout2, config);
-    Plotly.newPlot("linePlot", linetraces, layout3);
+    Plotly.newPlot("boxPlot", traces, layout1, {displaylogo: false}, config);
+    Plotly.newPlot("barPlot", bar, layout2, {displaylogo: false}, config);
+    Plotly.newPlot("linePlot", linetraces, layout3, {displaylogo: false}, config);
 
 }
 
@@ -874,12 +882,18 @@ function updateTable(){
 }
 
 function getMedian(arr) {
+    if(arr.length<1){
+        return -1;
+    }
     let sorted = [...arr].filter(v => v !== 'NaN' && !isNaN(v)).map(v => parseFloat(v)).sort((a, b) => a - b);
     let mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 function getMean(arr){
+    if(arr.length<1){
+        return -1;
+    }
     let sorted = [...arr].filter(v => v !== 'NaN' && !isNaN(v)).map(v => parseFloat(v)).sort((a, b) => a - b);
     let sum = 0;
     for(let i=0; i<sorted.length; i++){
