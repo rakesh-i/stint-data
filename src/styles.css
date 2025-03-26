@@ -59,7 +59,7 @@ body{
     display: flex;
     flex-direction: row;
     gap: 10px;
-    width: 95%;
+    width: 100%;
 }
 
 .container {
@@ -111,6 +111,9 @@ li.choose {
 }
 
 @media(max-width:1080px){
+    #content{
+        flex-direction: column;
+    }
     .selection{
         flex-direction: column;
         width: 95%;

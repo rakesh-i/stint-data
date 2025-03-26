@@ -2,7 +2,9 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     const mainContainer = document.getElementById("content");
-    
+    const selection = document.createElement("div");
+    selection.className = 'selection';
+
     function createSection(title, id) {
         const section = document.createElement("div");
         section.classList.add(id, "content");
@@ -30,10 +32,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const sessionSection = createSection("session", "session");
     const driverSection = createSection("driver", "driver");
 
-    mainContainer.appendChild(seasonSection);
-    mainContainer.appendChild(raceSection);
-    mainContainer.appendChild(sessionSection);
-    mainContainer.appendChild(driverSection);
+    selection.appendChild(seasonSection);
+    selection.appendChild(raceSection);
+    selection.appendChild(sessionSection);
+    selection.appendChild(driverSection);
+
+    mainContainer.appendChild(selection);
     
     // Add year options
     const yearList = document.getElementById("year-list");
