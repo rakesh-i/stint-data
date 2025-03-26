@@ -21,5 +21,10 @@
     "stream-browserify": "^3.0.0",
     "text-segmentation": "^1.0.3",
     "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack serve",
+    "deploy": "git subtree push --prefix dist origin gh-pages"
   }
 }
