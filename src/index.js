@@ -1,4 +1,4 @@
-// import "./styles.css";
+import "./styles.css";
 
 document.addEventListener("DOMContentLoaded", function () {
     const mainContainer = document.getElementById("content");
@@ -167,6 +167,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log('script.js loaded after HTML rendering');
 });
 
-import "./styles.css";
 
 
