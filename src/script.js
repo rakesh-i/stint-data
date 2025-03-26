@@ -1,3 +1,9 @@
+import * as XLSX from 'xlsx';
+import Plotly from 'plotly.js';
+import  html2canvas from'html2canvas';
+import assert from 'assert';
+import process from 'process';
+
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
@@ -892,7 +898,6 @@ function updateTable(){
         }
         
     }
-    // console.log(stintmap);
     displayTable(stintmap);
     updatePlot();
 }
@@ -918,21 +923,8 @@ function getMean(arr){
     return sum/sorted.length;
 }
 
-// function removeOutliers(data) {
-//     let cleanedData = data
-//         .filter(val => val[0] !== 'NaN' && !isNaN(val[0])) 
-//         .map(val => parseFloat(val)); 
-
-
-//     // let sorted = cleanedData.sort((a, b) => a - b);
-//     return cleanedData;
-// }
-
 function removeOutliers(data) {
     let cleanedData = data.filter(val => val[0] !== 'NaN' && !isNaN(val[0])).map(val => [parseFloat(val[0]), parseInt(val[1])]); 
-
-
-    // let sorted = cleanedData.sort((a, b) => a - b);
     return cleanedData;
 }
 
@@ -940,8 +932,7 @@ function removeOutliers(data) {
 document.getElementById('screenshot-btn').addEventListener('click', function() {
     let tableContainer = document.getElementById('table-container');
     
-    html2canvas(tableContainer).then(function(canvas) {
-        
+    html2canvas(tableContainer).then(function(canvas) {    
         let link = document.createElement('a');
         link.href = canvas.toDataURL();  
         link.download = 'screenshot.png';  
@@ -969,21 +960,16 @@ document.getElementById('selectall').addEventListener('click', function(){
 
 let isMedianSort = true; // Default OFF state
 
-document.addEventListener("DOMContentLoaded", function () {
-    const toggleSwitch = document.getElementById("toggleSwitch");
+document.getElementById('toggleSwitch').addEventListener("change", function(){
     const toggleLabel = document.getElementById("toggleLabel");
-    // let isMedianSort = true; // Default to Median
-
-    toggleSwitch.addEventListener("change", function () {
-        isMedianSort = !isMedianSort;
-        toggleLabel.textContent = isMedianSort ? "Median" : "Mean";
-
-        updatePlot();
-    });
-});
+    isMedianSort = !isMedianSort;
+    toggleLabel.textContent = isMedianSort ? "Median" : "Mean";
+    updatePlot();
+})
 
 document.getElementById("searchButton").addEventListener("click", searchDriver);
-
+document.getElementById('update').addEventListener('click', updateTable);
+document.getElementById('export').addEventListener('click', exportToExcel);
 
 
 createYearlist();

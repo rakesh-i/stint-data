@@ -47,11 +47,19 @@ body{
     background-color: #f6f4f0;
 }
 
+#content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #f6f4f0;
+}
+
 .selection{
     display: flex;
     flex-direction: row;
     gap: 10px;
-    width: 95%;
+    width: 100%;
 }
 
 .container {
@@ -103,6 +111,9 @@ li.choose {
 }
 
 @media(max-width:1080px){
+    #content{
+        flex-direction: column;
+    }
     .selection{
         flex-direction: column;
         width: 95%;
@@ -358,6 +369,10 @@ button:active{
     transform: scale(0.95);
     background-color: lightgray;
     color: black;
+}
+
+#charts{
+    width: 95%;
 }
 
 /* Style for the loading screen */
