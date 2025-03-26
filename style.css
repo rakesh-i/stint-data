@@ -61,6 +61,11 @@ body{
     background-color: rgb(246 244 240 );
 }
 
+.holder{
+    display: flex; 
+    align-items: center;
+}
+
 ul {
     list-style-type: none;
     padding: 0;
@@ -140,6 +145,7 @@ li.choose {
 }
 
 #driver-stints-form{
+    width: 95%;
     /* min-width: 350px; */
     flex-wrap: wrap;
     display: flex;

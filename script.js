@@ -486,7 +486,7 @@ function updatePlot() {
                         y: y,
                         type: "box",
                         boxpoints: false,
-                        name: `${lastName}-${tyre}`,
+                        name: tyre==='ALL'?`${lastName}`:`${lastName}-${tyre}`,
                         marker: { color: data.teamColor, size: 2 },
                         jitter: 0.5,
                         whiskerwidth: 0.2,
@@ -514,9 +514,9 @@ function updatePlot() {
         toImageButtonOptions: {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 875,
+          height: 810,
           width: 1440,
-          scale:1
+          scale:1.5
         }
     };
 
@@ -547,7 +547,8 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         showlegend: false,
         font: {
-            color: '#ffffff', 
+            color: '#ffffff',
+            size: 16 
         },
         modebar: {
             remove: 'lasso2dp',
@@ -604,6 +605,7 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
+            size: 16 
         },
         modebar: {
             remove: 'lasso',
@@ -638,6 +640,7 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         font: {
             color: '#ffffff',
+            size: 16 
         },
         modebar: {
             remove: 'lasso2dp',
@@ -649,7 +652,6 @@ function updatePlot() {
     let linetraces = [];
     let colorCount = {};
     stintmap.forEach((data, driver) => {
-        let tyreCount = {};
         let color = data.teamColor;
         if (!colorCount[color]) {
             colorCount[color] = 1;
@@ -660,15 +662,7 @@ function updatePlot() {
             let filteredLaps = removeOutliers(stint);
             let y = filteredLaps.map(item=>item[0]);
             let x = filteredLaps.map(item=>item[1]);
-            let tyre = data.tyres[index].slice(0, 3).toUpperCase();
             let lastName = driver.split(" ").pop().slice(0, 3).toUpperCase();
-
-            if (!tyreCount[tyre]) {
-                tyreCount[tyre] = 1;
-            } else {
-                tyreCount[tyre]++;
-                tyre += ` (${tyreCount[tyre]})`; 
-            }
 
             linetraces.push ({
                 y: y,
