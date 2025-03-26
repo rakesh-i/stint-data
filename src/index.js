@@ -1,4 +1,4 @@
-import "./styles.css";
+// import "./styles.css";
 
 document.addEventListener("DOMContentLoaded", function () {
     const mainContainer = document.getElementById("content");
@@ -25,10 +25,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     
     // Create selection sections
-    mainContainer.appendChild(createSection("season", "year"));
-    mainContainer.appendChild(createSection("race", "race"));
-    mainContainer.appendChild(createSection("session", "session"));
-    mainContainer.appendChild(createSection("driver", "driver"));
+    const seasonSection = createSection("season", "year");
+    const raceSection = createSection("race", "race");
+    const sessionSection = createSection("session", "session");
+    const driverSection = createSection("driver", "driver");
+
+    mainContainer.appendChild(seasonSection);
+    mainContainer.appendChild(raceSection);
+    mainContainer.appendChild(sessionSection);
+    mainContainer.appendChild(driverSection);
     
     // Add year options
     const yearList = document.getElementById("year-list");
@@ -52,7 +57,8 @@ document.addEventListener("DOMContentLoaded", function () {
     
     searchDiv.appendChild(searchButton);
     searchDiv.appendChild(selectAllButton);
-    mainContainer.appendChild(searchDiv);
+
+    driverSection.appendChild(searchDiv);
     
     // Divider
     const divider = document.createElement("div");
@@ -111,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // Charts Container
     const chartsDiv = document.createElement("div");
     chartsDiv.id = "charts";
-    chartsDiv.style.width = "95%";
     chartsDiv.style.display = "none";
     
     const medianDiv = document.createElement("div");
@@ -157,5 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await import('./script.js');
     console.log('script.js loaded after HTML rendering');
 });
+
+import "./styles.css";
 
 

@@ -47,6 +47,14 @@ body{
     background-color: #f6f4f0;
 }
 
+#content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background-color: #f6f4f0;
+}
+
 .selection{
     display: flex;
     flex-direction: row;
@@ -358,6 +366,10 @@ button:active{
     transform: scale(0.95);
     background-color: lightgray;
     color: black;
+}
+
+#charts{
+    width: 95%;
 }
 
 /* Style for the loading screen */
