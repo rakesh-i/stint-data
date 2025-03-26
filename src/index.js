@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButton.id = "update";
     updateButton.style.display = "none";
     updateButton.textContent = "UPDATE TABLE";
-    updateButton.onclick = function() { updateTable(); };
+    // updateButton.onclick = function() { updateTable(); };
     mainContainer.appendChild(updateButton);
     
     // Loading Screen
@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     const exportButton = document.createElement("button");
     exportButton.textContent = "Export to Excel";
-    exportButton.onclick = function() { exportToExcel(); };
+    // exportButton.onclick = function() { exportToExcel(); };
     
     const screenshotButton = document.createElement("button");
     screenshotButton.id = "screenshot-btn";
@@ -153,5 +153,9 @@ document.addEventListener("DOMContentLoaded", function () {
     
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+    await import('./script.js');
+    console.log('script.js loaded after HTML rendering');
+});
 
 
