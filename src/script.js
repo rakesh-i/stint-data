@@ -267,7 +267,7 @@ function displayTable(stintmap) {
     const container = document.getElementById('table-container');
     const chart = document.getElementById('charts');
     chart.style.display = "block";
-    exportdiv.style.display = 'block';
+    exportdiv.style.display = 'flex';
     if(l_name.length==0){
         container.innerHTML = '';
         chart.style.display = 'none';
@@ -963,7 +963,7 @@ document.getElementById('toggleSwitch').addEventListener("change", function(){
 
 document.getElementById("searchButton").addEventListener("click", searchDriver);
 document.getElementById('update').addEventListener('click', updateTable);
-document.getElementById('export').addEventListener('click', exportToExcel);
+document.getElementById('export-but').addEventListener('click', exportToExcel);
 
 
 createYearlist();

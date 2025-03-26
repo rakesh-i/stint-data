@@ -108,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     const exportButton = document.createElement("button");
     exportButton.textContent = "Export to Excel";
+    exportButton.id = 'export-but';
     // exportButton.onclick = function() { exportToExcel(); };
     
     const screenshotButton = document.createElement("button");
