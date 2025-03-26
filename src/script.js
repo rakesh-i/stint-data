@@ -1,9 +1,3 @@
-import * as XLSX from 'xlsx';
-import Plotly from 'plotly.js';
-import  html2canvas from'html2canvas';
-import assert from 'assert';
-import process from 'process';
-
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
