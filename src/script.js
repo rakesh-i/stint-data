@@ -16,6 +16,8 @@ const barDiv = document.getElementById('barPlot');
 const lineDiv = document.getElementById('linePlot'); 
 const loadingScreen = document.getElementById('loading-screen');
 const counterDiv = document.getElementById('count');
+
+//please don't break it.
 counter.up("rakesh-i.github.io", "stint-data").then((res) => {
     counterDiv.textContent = res.Count;
 })
