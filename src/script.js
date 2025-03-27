@@ -389,8 +389,8 @@ function displayTable(stintmap) {
 function updatePlot() {
     var x;
     var y;
-    var tablediv = document.getElementsByClassName('table');
-    x = tablediv.clientWidth;
+    var selectiondiv = document.getElementsByClassName('selection');
+    x = selectiondiv.clientWidth;
     if(x>1080){
         y = x/1.777;
     }
@@ -521,8 +521,8 @@ function updatePlot() {
         toImageButtonOptions: {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 810,
-          width: 1440,
+          height: 1080,
+          width: 1080,
           scale:1
         }
     };
