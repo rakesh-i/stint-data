@@ -375,6 +375,25 @@ button:active{
     width: 95%;
 }
 
+footer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#counter{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-family: "f1bold";
+    font-weight: 700;
+    font-size: 20px;
+}
+
+
 /* Style for the loading screen */
 #loading-screen {
     position: fixed;

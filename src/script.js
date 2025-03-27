@@ -1,3 +1,6 @@
+import {CounterAPI} from "counterapi";
+
+const counter = new CounterAPI();
 const apiBaseURL = 'https://api.openf1.org/v1';
 let driverMap = new Map();
 let controller = new AbortController();
@@ -12,6 +15,11 @@ const boxDiv = document.getElementById('boxPlot');
 const barDiv = document.getElementById('barPlot');
 const lineDiv = document.getElementById('linePlot'); 
 const loadingScreen = document.getElementById('loading-screen');
+const counterDiv = document.getElementById('count');
+counter.up("rakesh-i.github.io", "stint-data").then((res) => {
+    counterDiv.textContent = res.Count;
+})
+
 
 // Interactions
 function selectYear(event) {
