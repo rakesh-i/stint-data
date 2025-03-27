@@ -387,6 +387,13 @@ function displayTable(stintmap) {
 }
 
 function updatePlot() {
+    var x;
+    var y;
+    var tablediv = document.getElementsByClassName('table');
+    x = tablediv.clientWidth;
+    if(x>1080){
+        y = x/1.777;
+    }
     let stintmap = new Map();
     const table = document.querySelector("table");
     if (!table) return;
@@ -516,7 +523,7 @@ function updatePlot() {
           filename: `plot_${timestamp}`,
           height: 810,
           width: 1440,
-          scale:1.5
+          scale:1
         }
     };
 
@@ -526,15 +533,17 @@ function updatePlot() {
         },
         xaxis:{
             tickangle: 90,
+            
         },
         yaxis: { 
             title:{
                 text : "LAP TIME"
             },
-            autorange: true, 
+            // autorange: true, 
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
+            // scaleanchor: "x",
             
          },
         margin: {
@@ -548,13 +557,14 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
-            size: 16 
+            // size: 14 
         },
         modebar: {
             remove: 'lasso2dp',
             orientation: 'v'
         },
-        
+        height: y,
+        width: x,
     };
 
     // bar graph
@@ -569,12 +579,13 @@ function updatePlot() {
                 color: traceData.map(item=>item.trace.marker.color),
             },
             type: 'bar',
-            textposition: "outside",
+            textposition: "auto",
             textfont : {
-                size: 16,
+                // size: 16,
                 weight: 700
+                
             },
-            // textangle: "-90"
+            textangle: "-90"
         }
     ];
 
@@ -605,12 +616,14 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
-            size: 16 
+            // size: 14 
         },
         modebar: {
             remove: 'lasso',
             orientation: 'v'
         },
+        height: y,
+        width: x,
     };
 
     // Line chart
@@ -640,13 +653,15 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         font: {
             color: '#ffffff',
-            size: 16 
+            // size: 14 
         },
         modebar: {
             remove: 'lasso2dp',
             orientation: 'v'
         },
-        legend: {"orientation": "h"}
+        legend: {"orientation": "h"},
+        height: y,
+        width: x,
     };
 
     let linetraces = [];
@@ -683,6 +698,45 @@ function updatePlot() {
     Plotly.newPlot("barPlot", bar, layout2, config);
     Plotly.newPlot("linePlot", linetraces, layout3, config);
 
+    function resizePlot() {
+        var boxDiv = document.getElementById('boxPlot');
+        var barDiv = document.getElementById('barPlot');
+        var lineDiv = document.getElementById('linePlot'); 
+        x = boxDiv.clientWidth; 
+        if(x<1080){
+            Plotly.relayout(boxDiv, {
+                width: x,  
+                height: x  
+            });
+            Plotly.relayout(barDiv, {
+                width: x,  
+                height: x  
+            });
+            Plotly.relayout(lineDiv, {
+                width: x,  
+                height: x  
+            });
+        }
+        else{
+            Plotly.relayout(boxDiv, {
+                width: x,  
+                height: x/1.777 
+            });
+            Plotly.relayout(barDiv, {
+                width: x,  
+                height: x/1.777  
+            });
+            Plotly.relayout(lineDiv, {
+                width: x,  
+                height: x/1.777  
+            });
+        }
+        
+    }
+    
+    window.onload = resizePlot;
+    
+    window.addEventListener('resize', resizePlot);
 }
 
 function convertTime(sss_mmm) {
