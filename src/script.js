@@ -3,6 +3,15 @@ let driverMap = new Map();
 let controller = new AbortController();
 let conList = ['McLaren', 'Mercedes', 'Red Bull Racing', 'Williams', 'Aston Martin', 'Kick Sauber', 'Ferrari',  'Alpine',  'Racing Bulls', 'Haas F1 Team', 'null', null];
 let curYear = 2025;
+let toggleLabel = document.getElementById('toggleLabel');
+let orderby = "Median";
+const exportdiv = document.getElementById('export');
+const container = document.getElementById('table-container');
+const chart = document.getElementById('charts');
+const boxDiv = document.getElementById('boxPlot');
+const barDiv = document.getElementById('barPlot');
+const lineDiv = document.getElementById('linePlot'); 
+const loadingScreen = document.getElementById('loading-screen');
 
 // Interactions
 function selectYear(event) {
@@ -260,12 +269,6 @@ function displayTable(stintmap) {
         }
     }
 
-    // console.log(l_name, t_name, d_name);
-    
-    // console.log(driverMap);
-    const exportdiv = document.getElementById('export');
-    const container = document.getElementById('table-container');
-    const chart = document.getElementById('charts');
     chart.style.display = "block";
     exportdiv.style.display = 'flex';
     if(l_name.length==0){
@@ -389,7 +392,7 @@ function displayTable(stintmap) {
 function updatePlot() {
     var x;
     var y;
-    var selectiondiv = document.getElementsByClassName('selection');
+    const selectiondiv = document.getElementsByClassName('selection');
     x = selectiondiv.clientWidth;
     if(x>1080){
         y = x/1.777;
@@ -466,7 +469,6 @@ function updatePlot() {
 
     let traces = [];
     let traceData = [];
-    let orderby = document.getElementById('toggleLabel').textContent;
 
     stintmap.forEach((data, driver) => {
         let tyreCount = {};
@@ -506,6 +508,7 @@ function updatePlot() {
             
         });
     });
+    
     if(orderby=='Mean'){
         traceData.sort((a, b) => a.mean - b.mean);
     }
@@ -698,45 +701,26 @@ function updatePlot() {
     Plotly.newPlot("barPlot", bar, layout2, config);
     Plotly.newPlot("linePlot", linetraces, layout3, config);
 
-    function resizePlot() {
-        var boxDiv = document.getElementById('boxPlot');
-        var barDiv = document.getElementById('barPlot');
-        var lineDiv = document.getElementById('linePlot'); 
-        x = boxDiv.clientWidth; 
-        if(x<1080){
-            Plotly.relayout(boxDiv, {
-                width: x,  
-                height: x  
-            });
-            Plotly.relayout(barDiv, {
-                width: x,  
-                height: x  
-            });
-            Plotly.relayout(lineDiv, {
-                width: x,  
-                height: x  
-            });
-        }
-        else{
-            Plotly.relayout(boxDiv, {
-                width: x,  
-                height: x/1.777 
-            });
-            Plotly.relayout(barDiv, {
-                width: x,  
-                height: x/1.777  
-            });
-            Plotly.relayout(lineDiv, {
-                width: x,  
-                height: x/1.777  
-            });
-        }
-        
+    function debounce(func, delay) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
     }
     
-    window.onload = resizePlot;
+    const resizePlot = debounce(function() {
+        let x = boxDiv.clientWidth; 
+        let height = x < 1080 ? x : x / 1.777;
     
-    window.addEventListener('resize', resizePlot);
+        [boxDiv, barDiv, lineDiv].forEach(div => {
+            Plotly.relayout(div, { width: x, height: height });
+        });
+    }, 200);
+    
+    window.addEventListener("resize", resizePlot);
+    
+    window.onload = resizePlot;
 }
 
 function convertTime(sss_mmm) {
@@ -793,7 +777,7 @@ async function searchDriver(){
     try{
         controller.abort(); 
         controller = new AbortController();
-        document.getElementById('loading-screen').style.display = 'flex';
+        loadingScreen.style.display = 'flex';
         const container = document.getElementById('table-container');
         container.innerHTML = '';
         const chart = document.getElementById('charts');
@@ -818,7 +802,7 @@ async function searchDriver(){
         }
     catch(error){
         console.log(error);
-        document.getElementById('loading-screen').style.display = 'none';
+        loadingScreen.style.display = 'none';
     }
     
 }
@@ -826,7 +810,7 @@ async function searchDriver(){
 function generateStintSelection() {
     const formContainer = document.getElementById('driver-stints-form');
     formContainer.innerHTML = '';
-    document.getElementById('loading-screen').style.display = 'none';
+    loadingScreen.style.display = 'none';
     const updatebutton = document.getElementById('update');
     updatebutton.style.display = 'block';
     let array = [...driverMap];
@@ -978,7 +962,7 @@ function removeOutliers(data) {
 
 // Buttons
 document.getElementById('screenshot-btn').addEventListener('click', function() {
-    let tableContainer = document.getElementById('table-container');
+    const tableContainer = document.getElementById('table-container');
     
     html2canvas(tableContainer).then(function(canvas) {    
         let link = document.createElement('a');
@@ -997,7 +981,7 @@ document.getElementById('selectall').addEventListener('click', function(){
         searchDriver();
     }
     else{
-        document.getElementById('loading-screen').style.display = 'flex';
+        loadingScreen.style.display = 'flex';
         this.classList.add('clicked');
         const listDriver = document.querySelectorAll('#driver-list li');
         listDriver.forEach(item=> item.classList.add('choose'));
@@ -1009,9 +993,9 @@ document.getElementById('selectall').addEventListener('click', function(){
 let isMedianSort = true; // Default OFF state
 
 document.getElementById('toggleSwitch').addEventListener("change", function(){
-    const toggleLabel = document.getElementById("toggleLabel");
     isMedianSort = !isMedianSort;
     toggleLabel.textContent = isMedianSort ? "Median" : "Mean";
+    orderby = isMedianSort ? "Median" : "Mean";
     updatePlot();
 })
 
