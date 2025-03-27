@@ -22,7 +22,6 @@ counter.up("rakesh-i.github.io", "stint-data").then((res) => {
     counterDiv.textContent = res.Count;
 })
 
-
 // Interactions
 function selectYear(event) {
     const listYears = document.querySelectorAll('.year-container li');
