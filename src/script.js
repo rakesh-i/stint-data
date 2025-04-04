@@ -154,12 +154,30 @@ function createYearlist(){
 async function fetchMeetings(year){
     try {
         let meetings = await fetch(`${apiBaseURL}/meetings?year=${year}`);
+
+        if(!meetings.ok){
+            if (!meetings.status === 500) {
+                alert("🚨 Server Error (500). Please try again later.");
+            } else if (meetings.status === 429) {
+                alert("⚠️ Too many requests (429). Please wait and try again.");
+            } else {
+                alert(`❌ Error ${meetings.status}: ${meetings.statusText}`);
+            }
+            return null;
+        }
         let data = await meetings.json();
         createRacelist(data);
     }
     catch (error) {
-        alert("API Rate Exceeded :(");
+        if (error.name === "AbortError") {
+            console.log("Request was aborted.");
+        } else if (error instanceof TypeError && error.message === "Failed to fetch") {
+            alert("Failed to reach server.");
+        } else {
+            alert(`❗ Unexpected error: ${error.message}`);
+        }
         console.log(error);
+        return null;
     }
 }
 
@@ -172,11 +190,29 @@ async function fetchSessions(country) {;
             return;
         }
         let session = await fetch(`${apiBaseURL}/sessions?country_name=${country}&year=${year}`);
+        if(!session.ok){
+            if (!session.status === 500) {
+                alert("🚨 Server Error (500). Please try again later.");
+            } else if (session.status === 429) {
+                alert("⚠️ Too many requests (429). Please wait and try again.");
+            } else {
+                alert(`❌ Error ${session.status}: ${session.statusText}`);
+            }
+            return null;
+        }
         let data = await session.json();
 
         createSessionList(data);
     } catch (error) {
+        if (error.name === "AbortError") {
+            console.log("Request was aborted.");
+        } else if (error instanceof TypeError && error.message === "Failed to fetch") {
+            alert("Failed to reach server.");
+        } else {
+            alert(`❗ Unexpected error: ${error.message}`);
+        }
         console.log(error);
+        return null;
     }
     
 }
@@ -184,15 +220,33 @@ async function fetchSessions(country) {;
 async function showDriverSearch(sessionKey) {
     try {
         let drivers = await fetch(`${apiBaseURL}/drivers?session_key=${sessionKey}`);
+        if(!drivers.ok){
+            if (!drivers.status === 500) {
+                alert("🚨 Server Error (500). Please try again later.");
+            } else if (drivers.status === 429) {
+                alert("⚠️ Too many requests (429). Please wait and try again.");
+            } else {
+                alert(`❌ Error ${drivers.status}: ${drivers.statusText}`);
+            }
+            return null;
+        }
         let data = await drivers.json();
-
+        
         if (!sessionKey) {
             alert('Please select l_name session.');
             return;
         }
         createDriverList(data);
     } catch (error) {
+        if (error.name === "AbortError") {
+            console.log("Request was aborted.");
+        } else if (error instanceof TypeError && error.message === "Failed to fetch") {
+            alert("Failed to reach server.");
+        } else {
+            alert(`❗ Unexpected error: ${error.message}`);
+        }
         console.log(error);
+        return null;
     }
     
 }
@@ -203,8 +257,28 @@ async function gatherdata(driver_number, name, team, team_color){
         const stinttyre = [];
         const sessionKey = document.querySelector('#session-list li.choose').value;
         let response = await fetch(`${apiBaseURL}/laps?session_key=${sessionKey}&driver_number=${driver_number}`, { signal: controller.signal });
+        if (!response.ok) {
+            if (response.status === 500) {
+                alert("🚨 Server Error (500). Please try again later.");
+            } else if (response.status === 429) {
+                alert("⚠️ Too many requests (429). Please wait and try again.");
+            } else {
+                alert(`❌ Error ${response.status}: ${response.statusText}`);
+            }
+            return null;
+        }
         const data1 = await response.json();
         response = await fetch(`${apiBaseURL}/stints?session_key=${sessionKey}&driver_number=${driver_number}`, { signal: controller.signal });
+        if (!response.ok) {
+            if (response.status === 500) {
+                alert("🚨 Server Error (500). Please try again later.");
+            } else if (response.status === 429) {
+                alert("⚠️ Too many requests (429). Please wait and try again.");
+            } else {
+                alert(`❌ Error ${response.status}: ${response.statusText}`);
+            }
+            return null;
+        }
         const data2 = await response.json();
         // console.log(data1);
         if(!data1||!data2){
@@ -251,7 +325,15 @@ async function gatherdata(driver_number, name, team, team_color){
         });
         
     } catch (error) {
+        if (error.name === "AbortError") {
+            console.log("Request was aborted.");
+        } else if (error instanceof TypeError && error.message === "Failed to fetch") {
+            alert("Failed to reach server.");
+        } else {
+            alert(`❗ Unexpected error: ${error.message}`);
+        }
         console.log(error);
+        return null;
     }
 }
 
