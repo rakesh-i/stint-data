@@ -158,6 +158,7 @@ async function fetchMeetings(year){
         createRacelist(data);
     }
     catch (error) {
+        alert("API Rate Exceeded :(");
         console.log(error);
     }
 }
