@@ -164,9 +164,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const footer = document.getElementById("footer");
+    footer.style.display = "block";
     await import('./script.js');
     console.log('script.js loaded after HTML rendering');
 });
-
 
 

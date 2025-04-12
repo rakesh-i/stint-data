@@ -2,6 +2,7 @@ import {CounterAPI} from "counterapi";
 
 const counter = new CounterAPI();
 const apiBaseURL = 'https://api.openf1.org/v1';
+// const apiBaseURL = 'http://127.0.0.1:8000/v1';
 let driverMap = new Map();
 let controller = new AbortController();
 let conList = ['McLaren', 'Mercedes', 'Red Bull Racing', 'Williams', 'Aston Martin', 'Kick Sauber', 'Ferrari',  'Alpine',  'Racing Bulls', 'Haas F1 Team', 'null', null];
@@ -17,7 +18,7 @@ const lineDiv = document.getElementById('linePlot');
 const loadingScreen = document.getElementById('loading-screen');
 const counterDiv = document.getElementById('count');
 
-//please don't break it.
+// please don't break it.
 counter.up("rakesh-i.github.io", "stint-data").then((res) => {
     counterDiv.textContent = res.Count;
 })
@@ -627,7 +628,7 @@ function updatePlot() {
             text: `Race Pace Sorted by ${orderby}`
         },
         xaxis:{
-            tickangle: 90,
+            tickangle: -90,
             
         },
         yaxis: { 
@@ -689,7 +690,7 @@ function updatePlot() {
             text: `Deficit to the leader Sorted by ${orderby}`
         },
         xaxis:{
-            tickangle: 90,
+            tickangle: -90,
         },
         yaxis: { 
             title:{
@@ -727,7 +728,7 @@ function updatePlot() {
             text: `Race Progression`
         },
         xaxis:{
-            tickangle: 90,
+            // tickangle: 90,
         },
         yaxis: { 
             title:{
