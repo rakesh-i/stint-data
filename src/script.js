@@ -19,9 +19,9 @@ const loadingScreen = document.getElementById('loading-screen');
 const counterDiv = document.getElementById('count');
 
 // please don't break it.
-counter.up("rakesh-i.github.io", "stint-data").then((res) => {
-    counterDiv.textContent = res.Count;
-})
+// counter.up("rakesh-i.github.io", "stint-data").then((res) => {
+//     counterDiv.textContent = res.Count;
+// })
 
 // Interactions
 function selectYear(event) {
