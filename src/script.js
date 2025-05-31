@@ -589,10 +589,12 @@ function updatePlot() {
                         type: "box",
                         boxpoints: false,
                         name: tyre==='ALL'?`${lastName}`:`${lastName}-${tyre}`,
-                        marker: { color: data.teamColor, size: 2 },
+                        marker: { color: 'white'},
+                        fillcolor:data.teamColor,
+                        outliercolor: data.teamColor,
                         jitter: 0.5,
                         whiskerwidth: 0.2,
-                        line: { width: 1 },
+                        line: { width: 2 },
                         boxpoints: 'suspectedoutliers',
                         boxmean:(orderby=='Mean')?true:false
                     }
@@ -641,7 +643,7 @@ function updatePlot() {
             gridwidth: 1,
             // scaleanchor: "x",
             
-         },
+        },
         margin: {
             l: 50,
             r: 30,
@@ -672,7 +674,7 @@ function updatePlot() {
             x: traceData.map(item=>item.trace.name),
             text: (orderby=="Mean")?traceData.map(item=>(item.mean/first*100-100).toFixed(3)+"%"):traceData.map(item=>(item.median/first*100-100).toFixed(3)+"%"),
             marker:{
-                color: traceData.map(item=>item.trace.marker.color),
+                color: traceData.map(item=>item.trace.fillcolor),
             },
             type: 'bar',
             textposition: "auto",
