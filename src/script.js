@@ -619,7 +619,7 @@ function updatePlot() {
         toImageButtonOptions: {
           format: 'png', // one of png, svg, jpeg, webp
           filename: `plot_${timestamp}`,
-          height: 1080,
+          height: 800,
           width: 1080,
           scale:1
         }
@@ -631,6 +631,10 @@ function updatePlot() {
         },
         xaxis:{
             tickangle: -90,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
             
         },
         yaxis: { 
@@ -641,6 +645,10 @@ function updatePlot() {
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
             // scaleanchor: "x",
             
         },
@@ -655,7 +663,7 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
-            // size: 14 
+            size: 16 
         },
         modebar: {
             remove: 'lasso2dp',
@@ -677,13 +685,14 @@ function updatePlot() {
                 color: traceData.map(item=>item.trace.fillcolor),
             },
             type: 'bar',
-            textposition: "auto",
+            textposition: "outside",
             textfont : {
-                // size: 16,
+                size: 16,
                 weight: 700
                 
             },
-            textangle: "-90"
+            textangle: "-90",
+            cliponaxis: false
         }
     ];
 
@@ -693,6 +702,11 @@ function updatePlot() {
         },
         xaxis:{
             tickangle: -90,
+            automargin: true,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
         },
         yaxis: { 
             title:{
@@ -702,6 +716,11 @@ function updatePlot() {
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
+            automargin: true,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
          },
         margin: {
             l: 50,
@@ -714,7 +733,7 @@ function updatePlot() {
         showlegend: false,
         font: {
             color: '#ffffff',
-            // size: 14 
+            size: 16 
         },
         modebar: {
             remove: 'lasso',
@@ -722,6 +741,7 @@ function updatePlot() {
         },
         height: y,
         width: x,
+        
     };
 
     // Line chart
@@ -731,6 +751,11 @@ function updatePlot() {
         },
         xaxis:{
             // tickangle: 90,
+            dtick: 5,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
         },
         yaxis: { 
             title:{
@@ -740,6 +765,10 @@ function updatePlot() {
             showgrid: true,
             gridcolor: 'rgb(50, 50, 50)',
             gridwidth: 1,
+            showline: true,        // show the axis line
+            linecolor: 'white',      // axis line color
+            linewidth: 2,          // thickness of axis line
+            tickcolor:  'rgb(50, 50, 50)',  
          },
         margin: {
             l: 50,
@@ -751,7 +780,7 @@ function updatePlot() {
         plot_bgcolor: "rgb(0,0,0)",
         font: {
             color: '#ffffff',
-            // size: 14 
+            size: 16 
         },
         modebar: {
             remove: 'lasso2dp',
